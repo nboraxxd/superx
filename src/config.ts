@@ -21,10 +21,11 @@ const configSchema = z.object({
   PROTOCOL: z.enum(['http', 'https']).default('http'),
   DOMAIN: z.string(),
   PORT: z.coerce.number().default(4000),
-  DATABASE_USERNAME: z.string(),
-  DATABASE_PASSWORD: z.string(),
-  DATABASE_CLUSTER: z.string(),
-  DATABASE_NAME: z.string(),
+  DB_USERNAME: z.string(),
+  DB_PASSWORD: z.string(),
+  DB_CLUSTER: z.string(),
+  DB_NAME: z.string(),
+  DB_USERS_COLLECTION: z.string(),
 })
 
 const configServer = configSchema.safeParse(process.env)
