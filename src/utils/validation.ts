@@ -1,21 +1,32 @@
 import express from 'express'
-import { validationResult, ValidationChain } from 'express-validator'
+import { HttpStatusCode } from 'axios'
 import { RunnableValidationChains } from 'express-validator/src/middlewares/schema'
+import { validationResult, ValidationChain } from 'express-validator'
+
+import { EntityError, ErrorWithStatusCode } from '@/models/Errors'
 
 // sequential processing, stops running validations chain if the previous one fails.
 export const validate = (validation: RunnableValidationChains<ValidationChain>) => {
-  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return async (req: express.Request, _res: express.Response, next: express.NextFunction) => {
     await validation.run(req)
 
     const errors = validationResult(req)
 
-    // Kiểm tra errors.isEmpty(), `isEmpty` là có trống hay không
-    // Nếu có lỗi thì có nghĩa là không trống, errors.isEmpty() trả về false, không cho phép đi tiếp
-    // Nếu không có lỗi thì là empty, errors.isEmpty() trả về true, cho phép next()
-    if (errors.isEmpty()) {
-      return next()
+    // Có lỗi là không empty, errors.isEmpty() return false. Không có lỗi là empty, errors.isEmpty() return true
+    if (errors.isEmpty()) return next()
+
+    const errorsObject = errors.mapped()
+    const entityError = new EntityError({ errors: {} })
+
+    for (const key in errorsObject) {
+      const { msg } = errorsObject[key]
+
+      // Trả về lỗi không thuộc lỗi của quá trình validate
+      if (msg instanceof ErrorWithStatusCode && msg.status_code !== HttpStatusCode.UnprocessableEntity) return next(msg)
+
+      entityError.errors[key] = errorsObject[key]
     }
 
-    res.status(400).json({ errors: errors.mapped() })
+    next(entityError)
   }
 }
