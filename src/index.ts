@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 
 import envConfig, { API_URL } from '@/config'
 import usersRouter from '@/routes/users.routes'
@@ -14,6 +14,11 @@ app.use('/users', usersRouter)
 
 // kết nối với database
 databaseService.connect()
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.log('Loi la', err.message)
+  res.status(400).json({ message: err.message })
+})
 
 app.listen(port, () => {
   console.log(`App listening at ${API_URL}`)
