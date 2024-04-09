@@ -2,6 +2,11 @@ import User from '@/models/schemas/User.schema'
 import databaseService from '@/services/database.services'
 
 class UsersService {
+  async isEmailExists(email: string) {
+    const user = await databaseService.users.findOne({ email })
+    return Boolean(user)
+  }
+
   async register(payload: { email: string; password: string }) {
     const { email, password } = payload
 

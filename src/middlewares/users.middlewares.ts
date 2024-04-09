@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
 
+import usersService from '@/services/users.services'
 import { validate } from '@/utils/validation'
 
 export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +17,22 @@ export const loginValidator = (req: Request, res: Response, next: NextFunction) 
 export const registerValidator = validate(
   checkSchema({
     name: { trim: true, notEmpty: true, isLength: { options: { min: 1, max: 100 } } },
-    email: { trim: true, notEmpty: true, isEmail: true },
+    email: {
+      trim: true,
+      notEmpty: true,
+      isEmail: true,
+      custom: {
+        options: async (value: string) => {
+          const isExistEmail = await usersService.isEmailExists(value)
+
+          if (isExistEmail) {
+            throw new Error('Email already exists')
+          }
+
+          return true
+        },
+      },
+    },
     date_of_birth: {
       trim: true,
       notEmpty: true,
@@ -55,8 +71,13 @@ export const registerValidator = validate(
         errorMessage: 'Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 symbol',
       },
       custom: {
-        options: (value, { req }) => value === req.body.password,
-        errorMessage: 'Passwords do not match',
+        options: (value, { req }) => {
+          if (value !== req.body.password) {
+            throw new Error('Passwords do not match')
+          }
+
+          return true
+        },
       },
     },
   })
