@@ -26,6 +26,17 @@ const configSchema = z.object({
   DB_CLUSTER: z.string(),
   DB_NAME: z.string(),
   DB_USERS_COLLECTION: z.string(),
+  PASSWORD_SUFFIX_SECRET: z.string(),
+
+  JWT_SECRET_ACCESS_TOKEN: z.string(),
+  JWT_SECRET_REFRESH_TOKEN: z.string(),
+  JWT_SECRET_EMAIL_VERIFY_TOKEN: z.string(),
+  JWT_SECRET_FORGOT_PASSWORD_TOKEN: z.string(),
+
+  JWT_ACCESS_TOKEN_EXPIRES_IN: z.string(),
+  JWT_REFRESH_TOKEN_EXPIRES_IN: z.string(),
+  JWT_EMAIL_VERIFY_TOKEN_EXPIRES_IN: z.string(),
+  JWT_FORGOT_PASSWORD_TOKEN_EXPIRES_IN: z.string(),
 })
 
 const configServer = configSchema.safeParse(process.env)
