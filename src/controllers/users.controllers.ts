@@ -1,13 +1,20 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { HttpStatusCode } from 'axios'
+import { ObjectId } from 'mongodb'
 
+import User from '@/models/schemas/User.schema'
 import usersService from '@/services/users.services'
 import { AUTHENTICATION_MESSAGES } from '@/constants/message'
-import { RegisterReqBody } from '@/models/requests/User.requests'
+import { LoginReqBody, RegisterReqBody } from '@/models/requests/User.requests'
 
-export const loginController = (req: Request, res: Response) => {
-  res.json({ message: 'User logged in' })
+export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
+  const user = req.user as User
+  const userId = user._id as ObjectId
+
+  const result = await usersService.login(userId.toString())
+
+  return res.json({ message: AUTHENTICATION_MESSAGES.LOGIN_SUCCESS, result })
 }
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {

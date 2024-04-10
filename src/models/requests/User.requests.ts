@@ -29,6 +29,21 @@
  *      type: string
  *      format: password
  *      example: Abcd12345@#
+ *
+ *   LoginReqBody:
+ *    required:
+ *    - email
+ *    - password
+ *    type: object
+ *    properties:
+ *     email:
+ *      type: string
+ *      example: bruce@wayne.dc
+ *     password:
+ *      type: string
+ *      format: password
+ *      example: Abcd12345@#
+ *
  *   SuccessAuthentication:
  *    type: object
  *    properties:
@@ -46,4 +61,9 @@ export interface RegisterReqBody {
   date_of_birth: string
   password: string
   confirm_password: string
+}
+
+export interface LoginReqBody {
+  email: string
+  password: string
 }

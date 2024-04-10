@@ -27,9 +27,8 @@ class UsersService {
     })
   }
 
-  async isEmailExists(email: string) {
-    const user = await databaseService.users.findOne({ email })
-    return Boolean(user)
+  private async signAccessTokenAndRefreshToken(userId: string) {
+    return Promise.all([this.signAccessToken(userId), this.signRefreshToken(userId)])
   }
 
   async register(payload: Omit<RegisterReqBody, 'confirm_password'>) {
@@ -39,12 +38,15 @@ class UsersService {
       new User({ name, email, date_of_birth: new Date(date_of_birth), password: hashPassword(password) })
     )
 
-    const user_id = result.insertedId.toString()
+    const userId = result.insertedId.toString()
 
-    const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id),
-    ])
+    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(userId)
+
+    return { access_token, refresh_token }
+  }
+
+  async login(userId: string) {
+    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(userId)
 
     return { access_token, refresh_token }
   }

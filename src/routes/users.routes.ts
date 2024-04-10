@@ -6,8 +6,6 @@ import { loginController, registerController } from '@/controllers/users.control
 
 const usersRouter = Router()
 
-usersRouter.post('/login', loginValidator, loginController)
-
 /**
  * @swagger
  * /users/register:
@@ -41,5 +39,39 @@ usersRouter.post('/login', loginValidator, loginController)
  *     description: Invalid value or missing field
  */
 usersRouter.post('/register', registerValidator, wrapRequestHandler(registerController))
+
+/**
+ * @swagger
+ * /users/login:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Login a user
+ *   description: Login a user having email and password
+ *   operationId: loginUser
+ *   requestBody:
+ *    description: User information
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/LoginReqBody'
+ *   responses:
+ *    '200':
+ *     description: Login success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Login success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessAuthentication'
+ *    '422':
+ *     description: Invalid value or missing field
+ */
+usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
 
 export default usersRouter

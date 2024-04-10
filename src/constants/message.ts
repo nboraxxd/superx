@@ -73,6 +73,7 @@ export const AUTHENTICATION_MESSAGES = {
 } as const
 
 export const DATE_MESSAGES = {
+  REQUIRED: 'Date of birth is required',
   ISO8601: 'Date of birth must be ISO8601',
 } as const
 
