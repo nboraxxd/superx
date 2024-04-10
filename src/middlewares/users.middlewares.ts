@@ -1,8 +1,15 @@
+import { Request } from 'express'
+import { HttpStatusCode } from 'axios'
+import { JsonWebTokenError } from 'jsonwebtoken'
 import { ParamSchema, checkSchema } from 'express-validator'
 
+import envConfig from '@/config'
 import databaseService from '@/services/database.services'
 import { validate } from '@/utils/validation'
 import { hashPassword } from '@/utils/crypto'
+import { verifyToken } from '@/utils/jwt'
+import { capitalizeFirstLetter } from '@/utils/common'
+import { ErrorWithStatusCode } from '@/models/Errors'
 import {
   AUTHENTICATION_MESSAGES,
   DATE_MESSAGES,
@@ -67,7 +74,7 @@ const confirmPasswordSchema: ParamSchema = {
     errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRONG,
   },
   custom: {
-    options: (value, { req }) => {
+    options: (value: string, { req }) => {
       if (value !== req.body.password) {
         throw new Error(PASSWORD_MESSAGES.CONFIRM_PASSWORD_THE_SAME_AS_PASSWORD)
       }
@@ -77,46 +84,146 @@ const confirmPasswordSchema: ParamSchema = {
   },
 }
 
-export const loginValidator = validate(
-  checkSchema({
-    email: {
-      ...baseEmailSchema,
-      custom: {
-        options: async (value, { req }) => {
-          const user = await databaseService.users.findOne({ email: value, password: hashPassword(req.body.password) })
+export const accessTokenValidator = validate(
+  checkSchema(
+    {
+      Authorization: {
+        custom: {
+          options: async (value: string, { req }) => {
+            // Không nên dùng value.replace('Bearer ', '') vì nếu value không chứa 'Bearer ' thì vẫn nhận được value ban đầu
+            const access_token = (value || '').split('Bearer ')[1]
 
-          if (!user) {
-            throw new Error(AUTHENTICATION_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
-          }
+            if (!access_token) {
+              throw new ErrorWithStatusCode({
+                message: AUTHENTICATION_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                status_code: HttpStatusCode.Unauthorized,
+              })
+            }
 
-          req.user = user
-          return true
+            try {
+              const decoded_authorization = await verifyToken({
+                token: access_token,
+                secretOrPublicKey: envConfig.JWT_SECRET_ACCESS_TOKEN,
+              })
+
+              ;(req as Request).decoded_authorization = decoded_authorization
+            } catch (error) {
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatusCode({
+                  message: capitalizeFirstLetter(error.message),
+                  status_code: HttpStatusCode.Unauthorized,
+                })
+              } else {
+                throw error
+              }
+            }
+          },
         },
       },
     },
-    password: passwordSchema,
-  })
+    ['headers']
+  )
+)
+
+export const refreshTokenValidator = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatusCode({
+                message: AUTHENTICATION_MESSAGES.REFRESH_TOKEN_IS_REQUIRED,
+                status_code: HttpStatusCode.Unauthorized,
+              })
+            }
+
+            try {
+              const [decoded_refresh_token, refresh_token] = await Promise.all([
+                verifyToken({
+                  token: value,
+                  secretOrPublicKey: envConfig.JWT_SECRET_REFRESH_TOKEN,
+                }),
+                databaseService.refreshTokens.findOne({ token: value }),
+              ])
+
+              if (!refresh_token) {
+                throw new ErrorWithStatusCode({
+                  message: AUTHENTICATION_MESSAGES.REFRESH_TOKEN_USED_OR_NOT_EXIST,
+                  status_code: HttpStatusCode.Unauthorized,
+                })
+              }
+
+              ;(req as Request).decoded_refresh_token = decoded_refresh_token
+            } catch (error) {
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatusCode({
+                  message: capitalizeFirstLetter(error.message),
+                  status_code: HttpStatusCode.Unauthorized,
+                })
+              } else {
+                throw error
+              }
+            }
+
+            return true
+          },
+        },
+      },
+    },
+    ['body']
+  )
 )
 
 export const registerValidator = validate(
-  checkSchema({
-    name: nameSchema,
-    email: {
-      ...baseEmailSchema,
-      custom: {
-        options: async (value: string) => {
-          const user = await databaseService.users.findOne({ email: value })
+  checkSchema(
+    {
+      name: nameSchema,
+      email: {
+        ...baseEmailSchema,
+        custom: {
+          options: async (value: string) => {
+            const user = await databaseService.users.findOne({ email: value })
 
-          if (user) {
-            throw new Error(EMAIL_MESSAGES.ALREADY_EXISTS)
-          }
+            if (user) {
+              throw new Error(EMAIL_MESSAGES.ALREADY_EXISTS)
+            }
 
-          return true
+            return true
+          },
         },
       },
+      date_of_birth: dateOfBirthSchema,
+      password: passwordSchema,
+      confirm_password: confirmPasswordSchema,
     },
-    date_of_birth: dateOfBirthSchema,
-    password: passwordSchema,
-    confirm_password: confirmPasswordSchema,
-  })
+    ['body']
+  )
+)
+
+export const loginValidator = validate(
+  checkSchema(
+    {
+      email: {
+        ...baseEmailSchema,
+        custom: {
+          options: async (value: string, { req }) => {
+            const user = await databaseService.users.findOne({
+              email: value,
+              password: hashPassword(req.body.password),
+            })
+
+            if (!user) {
+              throw new Error(AUTHENTICATION_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
+            }
+
+            req.user = user
+            return true
+          },
+        },
+      },
+      password: passwordSchema,
+    },
+    ['body']
+  )
 )

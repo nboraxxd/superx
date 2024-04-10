@@ -1,8 +1,13 @@
 import { Router } from 'express'
 
 import { wrapRequestHandler } from '@/utils/handlers'
-import { loginValidator, registerValidator } from '@/middlewares/users.middlewares'
-import { loginController, registerController } from '@/controllers/users.controllers'
+import {
+  accessTokenValidator,
+  loginValidator,
+  refreshTokenValidator,
+  registerValidator,
+} from '@/middlewares/users.middlewares'
+import { loginController, logoutController, registerController } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
 
@@ -73,5 +78,7 @@ usersRouter.post('/register', registerValidator, wrapRequestHandler(registerCont
  *     description: Invalid value or missing field
  */
 usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
+
+usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
 
 export default usersRouter

@@ -1,12 +1,19 @@
 import jwt, { SignOptions } from 'jsonwebtoken'
 
-type SignToken = {
+import { TokenPayload } from '@/models/requests/Token.requests'
+
+type SignTokenType = {
   payload: any
   privateKey: string
   options?: SignOptions
 }
 
-export function signToken({ payload, privateKey, options = { algorithm: 'HS256' } }: SignToken) {
+type VerifyTokenType = {
+  token: string
+  secretOrPublicKey: string
+}
+
+export function signToken({ payload, privateKey, options = { algorithm: 'HS256' } }: SignTokenType) {
   return new Promise<string>((resolve, reject) => {
     jwt.sign(payload, privateKey, options, (err, token) => {
       if (err) {
@@ -18,14 +25,14 @@ export function signToken({ payload, privateKey, options = { algorithm: 'HS256' 
   })
 }
 
-export function verifyToken<T>(token: string, secretOrPublicKey: string) {
-  return new Promise<T>((resolve, reject) => {
+export function verifyToken({ token, secretOrPublicKey }: VerifyTokenType) {
+  return new Promise<TokenPayload>((resolve, reject) => {
     jwt.verify(token, secretOrPublicKey, (err, decoded) => {
       if (err) {
         throw reject(err)
       }
 
-      resolve(decoded as T)
+      resolve(decoded as TokenPayload)
     })
   })
 }

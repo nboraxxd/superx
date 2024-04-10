@@ -64,7 +64,6 @@ export const AUTHENTICATION_MESSAGES = {
 
   ACCESS_TOKEN_IS_REQUIRED: 'Access token is required',
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
-  REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
   REFRESH_TOKEN_USED_OR_NOT_EXIST: 'Refresh token has been used or does not exist',
   REFRESH_TOKEN_SUCCESS: 'Refresh token success',
   EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',

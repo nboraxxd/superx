@@ -1,12 +1,14 @@
-import envConfig from '@/config'
-import User from '@/models/schemas/User.schema'
-import databaseService from '@/services/database.services'
-import { TokenType } from '@/constants/enums'
-import { hashPassword } from '@/utils/crypto'
-import { signToken } from '@/utils/jwt'
-import { RegisterReqBody } from '@/models/requests/User.requests'
 import { ObjectId } from 'mongodb'
+
+import envConfig from '@/config'
+import databaseService from '@/services/database.services'
+import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
+import { RegisterReqBody } from '@/models/requests/User.requests'
+import { TokenType } from '@/constants/enums'
+import { AUTHENTICATION_MESSAGES } from '@/constants/message'
+import { signToken } from '@/utils/jwt'
+import { hashPassword } from '@/utils/crypto'
 
 class UsersService {
   private async signAccessToken(user_id: string) {
@@ -55,6 +57,12 @@ class UsersService {
     )
 
     return { access_token, refresh_token }
+  }
+
+  async logout(refresh_token: string) {
+    await databaseService.refreshTokens.deleteOne({ token: refresh_token })
+
+    return { message: AUTHENTICATION_MESSAGES.LOGOUT_SUCCESS }
   }
 }
 
