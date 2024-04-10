@@ -5,11 +5,13 @@ import { TokenType } from '@/constants/enums'
 import { hashPassword } from '@/utils/crypto'
 import { signToken } from '@/utils/jwt'
 import { RegisterReqBody } from '@/models/requests/User.requests'
+import { ObjectId } from 'mongodb'
+import RefreshToken from '@/models/schemas/RefreshToken.schema'
 
 class UsersService {
-  private async signAccessToken(userId: string) {
+  private async signAccessToken(user_id: string) {
     return signToken({
-      payload: { userId, token_type: TokenType.AccessToken },
+      payload: { user_id, token_type: TokenType.AccessToken },
       privateKey: envConfig.JWT_SECRET_ACCESS_TOKEN,
       options: {
         expiresIn: envConfig.JWT_ACCESS_TOKEN_EXPIRES_IN,
@@ -17,9 +19,9 @@ class UsersService {
     })
   }
 
-  private async signRefreshToken(userId: string) {
+  private async signRefreshToken(user_id: string) {
     return signToken({
-      payload: { userId, token_type: TokenType.RefreshToken },
+      payload: { user_id, token_type: TokenType.RefreshToken },
       privateKey: envConfig.JWT_SECRET_REFRESH_TOKEN,
       options: {
         expiresIn: envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -27,8 +29,8 @@ class UsersService {
     })
   }
 
-  private async signAccessTokenAndRefreshToken(userId: string) {
-    return Promise.all([this.signAccessToken(userId), this.signRefreshToken(userId)])
+  private async signAccessTokenAndRefreshToken(user_id: string) {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
   }
 
   async register(payload: Omit<RegisterReqBody, 'confirm_password'>) {
@@ -38,15 +40,19 @@ class UsersService {
       new User({ name, email, date_of_birth: new Date(date_of_birth), password: hashPassword(password) })
     )
 
-    const userId = result.insertedId.toString()
+    const user_id = result.insertedId.toString()
 
-    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(userId)
+    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(user_id)
 
     return { access_token, refresh_token }
   }
 
-  async login(userId: string) {
-    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(userId)
+  async login(user_id: string) {
+    const [access_token, refresh_token] = await this.signAccessTokenAndRefreshToken(user_id)
+
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+    )
 
     return { access_token, refresh_token }
   }

@@ -26,6 +26,8 @@ const configSchema = z.object({
   DB_CLUSTER: z.string(),
   DB_NAME: z.string(),
   DB_USERS_COLLECTION: z.string(),
+  DB_REFRESH_TOKENS_COLLECTION: z.string(),
+
   PASSWORD_SUFFIX_SECRET: z.string(),
 
   JWT_SECRET_ACCESS_TOKEN: z.string(),

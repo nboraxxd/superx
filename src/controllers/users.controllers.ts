@@ -10,9 +10,9 @@ import { LoginReqBody, RegisterReqBody } from '@/models/requests/User.requests'
 
 export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
   const user = req.user as User
-  const userId = user._id as ObjectId
+  const user_id = user._id as ObjectId
 
-  const result = await usersService.login(userId.toString())
+  const result = await usersService.login(user_id.toString())
 
   return res.json({ message: AUTHENTICATION_MESSAGES.LOGIN_SUCCESS, result })
 }

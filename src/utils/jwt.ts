@@ -17,3 +17,15 @@ export function signToken({ payload, privateKey, options = { algorithm: 'HS256' 
     })
   })
 }
+
+export function verifyToken<T>(token: string, secretOrPublicKey: string) {
+  return new Promise<T>((resolve, reject) => {
+    jwt.verify(token, secretOrPublicKey, (err, decoded) => {
+      if (err) {
+        throw reject(err)
+      }
+
+      resolve(decoded as T)
+    })
+  })
+}
