@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: API SuperX
+  description: |-
+    SuperX is a social media platform that enables users to connect and interact with others online. Users can create profiles, share posts, photos, and videos, and engage with content from friends and followers by liking, commenting, and sharing.
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: users
+    description: Operations about user
+paths:
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Register a new user
+      description: Create a new user having name, email, date of birth, password and confirm password
+      operationId: registerUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterReqBody'
+      responses:
+        '201':
+          description: Register success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Signup successfully
+                  result:
+                    $ref: '#/components/schemas/SuccessAuthentication'
+        '422':
+          description: Validation error
+components:
+  schemas:
+    RegisterReqBody:
+      required:
+        - name
+        - email
+        - date_of_birth
+        - password
+        - confirm_password
+      type: object
+      properties:
+        name:
+          type: string
+          example: Bruce Wayne
+        email:
+          type: string
+          example: bruce@wayne.dc
+        date_of_birth:
+          type: string
+          format: ISO 8601
+          example: 1970-02-19T08:46:24.000Z
+        password:
+          type: string
+          format: password
+          example: Abcd12345@#
+        confirm_password:
+          type: string
+          format: password
+          example: Abcd12345@#
+      xml:
+        name: users
+    SuccessAuthentication:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1N...
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1N...
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

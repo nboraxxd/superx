@@ -9,10 +9,36 @@ const usersRouter = Router()
 usersRouter.post('/login', loginValidator, loginController)
 
 /**
- * Description: Register a new user
- * Path: /register
- * Method: POST
- * Body: { name: string, email: string, date_of_birth: ISO8601, password: string, confirm_password: string }
+ * @swagger
+ * /users/register:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Register a new user
+ *   description: Create a new user having name, email, date of birth, password and confirm password
+ *   operationId: registerUser
+ *   requestBody:
+ *    description: User information
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/RegisterReqBody'
+ *   responses:
+ *    '201':
+ *     description: Register success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Register success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessAuthentication'
+ *    '422':
+ *     description: Invalid value or missing field
  */
 usersRouter.post('/register', registerValidator, wrapRequestHandler(registerController))
 

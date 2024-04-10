@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
 
 import usersService from '@/services/users.services'
+import { PASSWORD_MESSAGES } from '@/constants/message'
 import { validate } from '@/utils/validation'
 
 export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
@@ -45,8 +46,9 @@ export const registerValidator = validate(
     },
     password: {
       trim: true,
-      notEmpty: true,
-      isLength: { options: { min: 6, max: 50 } },
+      notEmpty: { errorMessage: PASSWORD_MESSAGES.REQUIRED },
+      isString: { errorMessage: PASSWORD_MESSAGES.STRING },
+      isLength: { options: { min: 6, max: 50 }, errorMessage: PASSWORD_MESSAGES.LENGTH },
       isStrongPassword: {
         options: {
           minLowercase: 1,
@@ -54,13 +56,14 @@ export const registerValidator = validate(
           minNumbers: 1,
           minSymbols: 1,
         },
-        errorMessage: 'Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 symbol',
+        errorMessage: PASSWORD_MESSAGES.STRONG,
       },
     },
     confirm_password: {
       trim: true,
-      notEmpty: true,
-      isLength: { options: { min: 6, max: 50 } },
+      notEmpty: { errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED },
+      isString: { errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_IS_STRING },
+      isLength: { options: { min: 6, max: 50 }, errorMessage: PASSWORD_MESSAGES.LENGTH_OF_CONFIRM_PASSWORD },
       isStrongPassword: {
         options: {
           minLowercase: 1,
@@ -68,12 +71,12 @@ export const registerValidator = validate(
           minNumbers: 1,
           minSymbols: 1,
         },
-        errorMessage: 'Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 symbol',
+        errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRONG,
       },
       custom: {
         options: (value, { req }) => {
           if (value !== req.body.password) {
-            throw new Error('Passwords do not match')
+            throw new Error(PASSWORD_MESSAGES.CONFIRM_PASSWORD_THE_SAME_AS_PASSWORD)
           }
 
           return true
