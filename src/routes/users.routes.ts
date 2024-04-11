@@ -3,11 +3,17 @@ import { Router } from 'express'
 import { wrapRequestHandler } from '@/utils/handlers'
 import {
   accessTokenValidator,
-  loginValidator,
   refreshTokenValidator,
   registerValidator,
+  verifyEmailValidator,
+  loginValidator,
 } from '@/middlewares/users.middlewares'
-import { loginController, logoutController, registerController } from '@/controllers/users.controllers'
+import {
+  registerController,
+  verifyEmailController,
+  loginController,
+  logoutController,
+} from '@/controllers/users.controllers'
 
 const usersRouter = Router()
 
@@ -79,6 +85,40 @@ usersRouter.post('/register', registerValidator, wrapRequestHandler(registerCont
  */
 usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
 
+/**
+ * @swagger
+ * /users/logout:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Logout a user
+ *   description: Logout a user having access token and refresh token
+ *   operationId: logoutUser
+ *   security:
+ *   - bearerAuth: []
+ *   requestBody:
+ *    description: Refresh token
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/LogoutReqBody'
+ *   responses:
+ *    '200':
+ *     description: Logout success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Logout success
+ *    '401':
+ *     description: Unauthorized
+ */
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
+
+usersRouter.post('/verify-email', verifyEmailValidator, wrapRequestHandler(verifyEmailController))
 
 export default usersRouter

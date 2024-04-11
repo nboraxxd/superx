@@ -201,6 +201,47 @@ export const registerValidator = validate(
   )
 )
 
+export const verifyEmailValidator = validate(
+  checkSchema(
+    {
+      email_verify_token: {
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatusCode({
+                message: AUTHENTICATION_MESSAGES.EMAIL_VERIFY_TOKEN_IS_REQUIRED,
+                status_code: HttpStatusCode.Unauthorized,
+              })
+            }
+
+            try {
+              const decoded_email_verify_token = await verifyToken({
+                token: value,
+                secretOrPublicKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
+              })
+
+              ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
+            } catch (error) {
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatusCode({
+                  message: capitalizeFirstLetter(error.message),
+                  status_code: HttpStatusCode.Unauthorized,
+                })
+              } else {
+                throw error
+              }
+            }
+
+            return true
+          },
+        },
+      },
+    },
+    ['body']
+  )
+)
+
 export const loginValidator = validate(
   checkSchema(
     {

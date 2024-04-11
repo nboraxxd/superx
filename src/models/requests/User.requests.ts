@@ -44,6 +44,15 @@
  *      format: password
  *      example: Abcd12345@#
  *
+ *   LogoutReqBody:
+ *    required:
+ *    - refresh_token
+ *    type: object
+ *    properties:
+ *     refresh_token:
+ *      type: string
+ *      example: eyJhbGciOiJIUzI1N...
+ *
  *   SuccessAuthentication:
  *    type: object
  *    properties:
@@ -55,7 +64,7 @@
  *      example: eyJhbGciOiJIUzI1N...
  */
 
-export interface RegisterReqBody {
+export type RegisterReqBody = {
   name: string
   email: string
   date_of_birth: string
@@ -63,11 +72,15 @@ export interface RegisterReqBody {
   confirm_password: string
 }
 
-export interface LoginReqBody {
+export type VerifyEmailReqBody = {
+  email_verify_token: string
+}
+
+export type LoginReqBody = {
   email: string
   password: string
 }
 
-export interface LogoutReqBody {
+export type LogoutReqBody = {
   refresh_token: string
 }
