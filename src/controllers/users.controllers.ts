@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { HttpStatusCode } from 'axios'
 import { ObjectId } from 'mongodb'
-import { addSeconds, differenceInSeconds } from 'date-fns'
 
 import envConfig from '@/config'
 import User from '@/models/schemas/User.schema'
@@ -12,7 +11,16 @@ import { verifyToken } from '@/utils/jwt'
 import { UserVerifyStatus } from '@/constants/enums'
 import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { TokenPayload } from '@/models/requests/Token.requests'
-import { LoginReqBody, LogoutReqBody, RegisterReqBody, VerifyEmailReqBody } from '@/models/requests/User.requests'
+import {
+  ForgotPasswordReqBody,
+  LoginReqBody,
+  LogoutReqBody,
+  RegisterReqBody,
+  VerifyEmailReqBody,
+} from '@/models/requests/User.requests'
+import { calculateSecondsDifference, capitalizeFirstLetter } from '@/utils/common'
+import { JsonWebTokenError } from 'jsonwebtoken'
+import { ErrorWithStatusCode } from '@/models/Errors'
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   const { name, email, date_of_birth, password } = req.body
@@ -59,28 +67,38 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   }
 
   // Verify email_verify_token
-  const { iat: emailVerifyTokenIat } = await verifyToken({
-    token: user.email_verify_token,
-    secretOrPublicKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
-  })
-
-  // Chuyển epoch time thành đối tượng Date
-  const iatDate = new Date(emailVerifyTokenIat * 1000)
-
-  // Lấy thời gian hiện tại
-  const currentDate = new Date()
-
-  // Cộng thêm 60s vào thời gian iat
-  const sixtySecondsAfterIat = addSeconds(iatDate, 60)
-
-  // Tính khoảng cách giây giữa thời gian iat + 60s và thời gian hiện tại
-  const secondsDifference = differenceInSeconds(sixtySecondsAfterIat, currentDate)
-
-  // Nếu khoảng cách giữa thời gian iat + 60s và thời gian hiện tại lớn hơn 0 thì trả về thông báo
-  if (secondsDifference > 0) {
-    return res.status(HttpStatusCode.TooManyRequests).json({
-      message: `Please try again in ${secondsDifference}s`,
+  try {
+    const { iat: emailVerifyTokenIat } = await verifyToken({
+      token: user.email_verify_token,
+      secretOrPublicKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
     })
+
+    const emailResendDelaySeconds = calculateSecondsDifference(
+      emailVerifyTokenIat,
+      envConfig.RESEND_EMAIL_DEBOUNCE_TIME
+    )
+
+    // Nếu khoảng cách giữa thời gian iat + 60s và thời gian hiện tại lớn hơn 0 thì trả về thông báo
+    if (emailResendDelaySeconds > 0) {
+      return res.status(HttpStatusCode.TooManyRequests).json({
+        message: `Please try again in ${emailResendDelaySeconds}s`,
+      })
+    }
+  } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      if (error.name === 'TokenExpiredError') {
+        const result = await usersService.resendEmailVerify(user_id)
+
+        return res.json(result)
+      } else {
+        throw new ErrorWithStatusCode({
+          message: capitalizeFirstLetter(error.message),
+          status_code: HttpStatusCode.Unauthorized,
+        })
+      }
+    } else {
+      throw error
+    }
   }
 
   const result = await usersService.resendEmailVerify(user_id)
@@ -89,10 +107,9 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
 }
 
 export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
-  const user = req.user as User
-  const user_id = user._id as ObjectId
+  const { _id: user_id } = req.user as User
 
-  const result = await usersService.login(user_id.toString())
+  const result = await usersService.login((user_id as ObjectId).toString())
 
   return res.json({ message: AUTHENTICATION_MESSAGES.LOGIN_SUCCESS, result })
 }
@@ -101,6 +118,53 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   const { refresh_token } = req.body
 
   const result = await usersService.logout(refresh_token)
+
+  return res.json(result)
+}
+
+export const forgotPasswordController = async (
+  req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
+  res: Response
+) => {
+  const { _id: user_id, forgot_password_token } = req.user as User
+
+  if (forgot_password_token !== '') {
+    try {
+      const { iat: forgotPasswordTokenIat } = await verifyToken({
+        token: forgot_password_token,
+        secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+      })
+
+      const emailResendDelaySeconds = calculateSecondsDifference(
+        forgotPasswordTokenIat,
+        envConfig.RESEND_EMAIL_DEBOUNCE_TIME
+      )
+
+      // Nếu khoảng cách giữa thời gian iat + 60s và thời gian hiện tại lớn hơn 0 thì trả về thông báo
+      if (emailResendDelaySeconds > 0) {
+        return res.status(HttpStatusCode.TooManyRequests).json({
+          message: `Please try again in ${emailResendDelaySeconds}s`,
+        })
+      }
+    } catch (error) {
+      if (error instanceof JsonWebTokenError) {
+        if (error.name === 'TokenExpiredError') {
+          const result = await usersService.forgotPassword((user_id as ObjectId).toString())
+
+          return res.json(result)
+        } else {
+          throw new ErrorWithStatusCode({
+            message: capitalizeFirstLetter(error.message),
+            status_code: HttpStatusCode.Unauthorized,
+          })
+        }
+      } else {
+        throw error
+      }
+    }
+  }
+
+  const result = await usersService.forgotPassword((user_id as ObjectId).toString())
 
   return res.json(result)
 }

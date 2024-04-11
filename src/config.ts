@@ -39,6 +39,7 @@ const configSchema = z.object({
   JWT_REFRESH_TOKEN_EXPIRES_IN: z.string(),
   JWT_EMAIL_VERIFY_TOKEN_EXPIRES_IN: z.string(),
   JWT_FORGOT_PASSWORD_TOKEN_EXPIRES_IN: z.string(),
+  RESEND_EMAIL_DEBOUNCE_TIME: z.coerce.number(),
 })
 
 const configServer = configSchema.safeParse(process.env)

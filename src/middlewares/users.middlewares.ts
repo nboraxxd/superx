@@ -16,6 +16,7 @@ import {
   EMAIL_MESSAGES,
   NAME_MESSAGES,
   PASSWORD_MESSAGES,
+  USER_MESSAGES,
 } from '@/constants/message'
 
 const nameSchema: ParamSchema = {
@@ -264,6 +265,29 @@ export const loginValidator = validate(
         },
       },
       password: passwordSchema,
+    },
+    ['body']
+  )
+)
+
+export const forgotPasswordValidator = validate(
+  checkSchema(
+    {
+      email: {
+        ...baseEmailSchema,
+        custom: {
+          options: async (value: string, { req }) => {
+            const user = await databaseService.users.findOne({ email: value })
+
+            if (!user) {
+              throw new Error(USER_MESSAGES.NOT_FOUND)
+            }
+
+            req.user = user
+            return true
+          },
+        },
+      },
     },
     ['body']
   )

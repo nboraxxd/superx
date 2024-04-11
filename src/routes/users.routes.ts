@@ -7,6 +7,7 @@ import {
   registerValidator,
   verifyEmailValidator,
   loginValidator,
+  forgotPasswordValidator,
 } from '@/middlewares/users.middlewares'
 import {
   registerController,
@@ -14,6 +15,7 @@ import {
   loginController,
   logoutController,
   resendEmailVerifyController,
+  forgotPasswordController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -180,5 +182,41 @@ usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
  *     description: Unauthorized
  */
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
+
+/**
+ * @swagger
+ * /users/forgot-password:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Send email with forgot password token
+ *   description: Send email with forgot password token to a user having email
+ *   operationId: forgotPassword
+ *   requestBody:
+ *    description: Email
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/ForgotPasswordReqBody'
+ *   responses:
+ *    '200':
+ *     description: Check email to reset password
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Check email to reset password
+ *    '401':
+ *     description: Unauthorized
+ *    '422':
+ *     description: Invalid value or missing field
+ *    '429':
+ *     description: Too many requests
+ */
+usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
 
 export default usersRouter

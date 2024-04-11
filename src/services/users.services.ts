@@ -45,6 +45,16 @@ class UsersService {
     })
   }
 
+  private async signForgotPasswordToken(user_id: string) {
+    return signToken({
+      payload: { user_id, token_type: TokenType.ForgotPasswordToken },
+      privateKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+      options: {
+        expiresIn: envConfig.JWT_FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
+      },
+    })
+  }
+
   async register(payload: Omit<RegisterReqBody, 'confirm_password'>) {
     const { name, email, date_of_birth, password } = payload
 
@@ -104,7 +114,7 @@ class UsersService {
 
   async resendEmailVerify(user_id: string) {
     const email_verify_token = await this.signEmailVerifyToken(user_id)
-    console.log('🍨 email_verify_token:', email_verify_token)
+    console.log('🍨 resend ~ email_verify_token:', email_verify_token)
 
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
@@ -133,6 +143,23 @@ class UsersService {
     await databaseService.refreshTokens.deleteOne({ token: refresh_token })
 
     return { message: AUTHENTICATION_MESSAGES.LOGOUT_SUCCESS }
+  }
+
+  async forgotPassword(user_id: string) {
+    const forgot_password_token = await this.signForgotPasswordToken(user_id)
+    console.log('🛴 forgot_password_token:', forgot_password_token)
+
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token,
+        },
+        $currentDate: { updated_at: true },
+      }
+    )
+
+    return { message: EMAIL_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD }
   }
 }
 
