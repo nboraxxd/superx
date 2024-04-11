@@ -31,7 +31,7 @@ export const EMAIL_MESSAGES = {
   NOT_VERIFIED: 'Email not verified',
   ALREADY_VERIFIED_BEFORE: 'Email already verified before',
   VERIFY_SUCCESS: 'Email verify success',
-  RESEND_VERIFY_EMAIL_SUCCESS: 'Resend verify email success',
+  RESEND_EMAIL_VERIFY_SUCCESS: 'Resend email verify success',
   CHECK_EMAIL_TO_RESET_PASSWORD: 'Check email to reset password',
 } as const
 
@@ -67,6 +67,7 @@ export const AUTHENTICATION_MESSAGES = {
   REFRESH_TOKEN_USED_OR_NOT_EXIST: 'Refresh token has been used or does not exist',
   REFRESH_TOKEN_SUCCESS: 'Refresh token success',
   EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
+  INVALID_EMAIL_VERIFY_TOKEN: 'Invalid email verify token',
   FORGOT_PASSWORD_TOKEN_IS_REQUIRED: 'Forgot password token is required',
   INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
 } as const

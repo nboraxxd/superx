@@ -6,7 +6,7 @@ import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
 import { RegisterReqBody } from '@/models/requests/User.requests'
 import { TokenType, UserVerifyStatus } from '@/constants/enums'
-import { AUTHENTICATION_MESSAGES } from '@/constants/message'
+import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES } from '@/constants/message'
 import { signToken } from '@/utils/jwt'
 import { hashPassword } from '@/utils/crypto'
 
@@ -100,6 +100,23 @@ class UsersService {
     ])
 
     return { access_token, refresh_token }
+  }
+
+  async resendEmailVerify(user_id: string) {
+    const email_verify_token = await this.signEmailVerifyToken(user_id)
+    console.log('🍨 email_verify_token:', email_verify_token)
+
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          email_verify_token,
+        },
+        $currentDate: { updated_at: true },
+      }
+    )
+
+    return { message: EMAIL_MESSAGES.RESEND_EMAIL_VERIFY_SUCCESS }
   }
 
   async login(user_id: string) {

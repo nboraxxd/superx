@@ -13,6 +13,7 @@ import {
   verifyEmailController,
   loginController,
   logoutController,
+  resendEmailVerifyController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -50,6 +51,67 @@ const usersRouter = Router()
  *     description: Invalid value or missing field
  */
 usersRouter.post('/register', registerValidator, wrapRequestHandler(registerController))
+
+/**
+ * @swagger
+ * /users/verify-email:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Verify email of a user
+ *   description: Verify email of a user having email verify token
+ *   operationId: verifyEmail
+ *   requestBody:
+ *    description: Email verify token
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/VerifyEmailReqBody'
+ *   responses:
+ *    '200':
+ *     description: Email verify success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Email verify success
+ *    '401':
+ *     description: Unauthorized
+ */
+usersRouter.post('/verify-email', verifyEmailValidator, wrapRequestHandler(verifyEmailController))
+
+/**
+ * @swagger
+ * /users/resend-email-verify:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Resend email verify token
+ *   description: Resend email verify token of a user
+ *   operationId: resendEmailVerify
+ *   security:
+ *   - bearerAuth: []
+ *   responses:
+ *    '200':
+ *     description: Resend email verify success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Resend email verify success
+ *    '401':
+ *     description: Unauthorized
+ *    '429':
+ *     description: Too many requests
+ */
+usersRouter.post('/resend-email-verify', accessTokenValidator, wrapRequestHandler(resendEmailVerifyController))
 
 /**
  * @swagger
@@ -118,7 +180,5 @@ usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
  *     description: Unauthorized
  */
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
-
-usersRouter.post('/verify-email', verifyEmailValidator, wrapRequestHandler(verifyEmailController))
 
 export default usersRouter

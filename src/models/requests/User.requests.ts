@@ -30,6 +30,15 @@
  *      format: password
  *      example: Abcd12345@#
  *
+ *   VerifyEmailReqBody:
+ *    required:
+ *    - email_verify_token
+ *    type: object
+ *    properties:
+ *     email_verify_token:
+ *      type: string
+ *      example: eyJhbGciOiJIUzI1N...
+ *
  *   LoginReqBody:
  *    required:
  *    - email
