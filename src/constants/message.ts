@@ -52,7 +52,7 @@ export const PASSWORD_MESSAGES = {
   VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: 'Verify forgot password token success',
   RESET_PASSWORD_SUCCESS: 'Reset password success',
   OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
-  ERROR_OLD_PASSWORD_IS_SAME_AS_NEW: 'The old password should not match the new password',
+  NEW_PASSWORD_MUST_BE_DIFF_FROM_OLD_PASSWORD: 'The new password must be different from the old password.',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
 } as const
 

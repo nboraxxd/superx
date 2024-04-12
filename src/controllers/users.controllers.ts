@@ -19,6 +19,7 @@ import {
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
+  ResetPasswordReqBody,
   VerifyEmailReqBody,
   VerifyForgotPasswordReqBody,
 } from '@/models/requests/User.requests'
@@ -41,7 +42,10 @@ export const verifyEmailController = async (req: Request<ParamsDictionary, any, 
   }
 
   if (user.email_verify_token !== email_verify_token) {
-    return res.status(HttpStatusCode.Unauthorized).json({ message: AUTHENTICATION_MESSAGES.INVALID_EMAIL_VERIFY_TOKEN })
+    return res.status(HttpStatusCode.Unauthorized).json({
+      message: AUTHENTICATION_MESSAGES.INVALID_EMAIL_VERIFY_TOKEN,
+      path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `email_verify_token`
+    })
   }
 
   // Nếu đã verify rồi thì trả về thông báo đã verify chớ không báo lỗi
@@ -158,7 +162,7 @@ export const forgotPasswordController = async (
           throw new ErrorWithStatusAndPath({
             message: capitalizeFirstLetter(error.message),
             status_code: HttpStatusCode.Unauthorized,
-            path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `forgot_password_token`
+            path: 'forgot_password_token',
           })
         }
       } else {
@@ -186,15 +190,46 @@ export const verifyForgotPasswordController = async (
   }
 
   if (user.forgot_password_token !== forgot_password_token) {
-    return res
-      .status(HttpStatusCode.Unauthorized)
-      .json({ message: AUTHENTICATION_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN })
+    return res.status(HttpStatusCode.Unauthorized).json({
+      message: AUTHENTICATION_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+      path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `email_verify_token`
+    })
   }
 
-  // Nếu forgot_password_token trong collection users là '' thì trả về thông báo đã token
+  // Nếu forgot_password_token trong collection users là '' thì trả về thông báo token đã được verify
   if (user.forgot_password_token === '') {
     return res.json({ message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY })
   }
 
   return res.json({ message: PASSWORD_MESSAGES.VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS })
+}
+
+export const resetPasswordController = async (
+  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  res: Response
+) => {
+  const { forgot_password_token, password } = req.body
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload
+
+  const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+
+  if (!user) {
+    return res.status(HttpStatusCode.NotFound).json({ message: USER_MESSAGES.NOT_FOUND })
+  }
+
+  if (user.forgot_password_token !== forgot_password_token) {
+    return res.status(HttpStatusCode.Unauthorized).json({
+      message: AUTHENTICATION_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+      path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `email_verify_token`
+    })
+  }
+
+  // Nếu forgot_password_token trong collection users là '' thì trả về thông báo token đã được verify
+  if (user.forgot_password_token === '') {
+    return res.json({ message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY })
+  }
+
+  const result = await usersService.resetPassword(user_id, password)
+
+  return res.json({ message: PASSWORD_MESSAGES.RESET_PASSWORD_SUCCESS, result })
 }

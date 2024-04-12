@@ -80,6 +80,25 @@
  *      type: string
  *      example: eyJhbGciOiJIUzI1N...
  *
+ *   ResetPasswordReqBody:
+ *    required:
+ *    - forgot_password_token
+ *    - password
+ *    - confirm_password
+ *    type: object
+ *    properties:
+ *     forgot_password_token:
+ *      type: string
+ *      example: eyJhbGciOiJIUzI1N...
+ *     password:
+ *      type: string
+ *      format: password
+ *      example: Abcd12345@#
+ *     confirm_password:
+ *      type: string
+ *      format: password
+ *      example: Abcd12345@#
+ *
  *   SuccessAuthentication:
  *    type: object
  *    properties:
@@ -118,4 +137,10 @@ export type ForgotPasswordReqBody = {
 
 export type VerifyForgotPasswordReqBody = {
   forgot_password_token: string
+}
+
+export type ResetPasswordReqBody = {
+  forgot_password_token: string
+  password: string
+  confirm_password: string
 }

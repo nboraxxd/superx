@@ -161,6 +161,29 @@ class UsersService {
 
     return { message: EMAIL_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD }
   }
+
+  async resetPassword(user_id: string, password: string) {
+    const [access_token, refresh_token] = await Promise.all([
+      this.signAccessToken(user_id),
+      this.signRefreshToken(user_id),
+      databaseService.users.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            password: hashPassword(password),
+            forgot_password_token: '',
+          },
+          $currentDate: { updated_at: true },
+        }
+      ),
+    ])
+
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+    )
+
+    return { access_token, refresh_token }
+  }
 }
 
 const usersService = new UsersService()

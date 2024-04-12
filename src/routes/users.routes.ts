@@ -9,6 +9,7 @@ import {
   loginValidator,
   forgotPasswordValidator,
   verifyForgotPasswordValidator,
+  resetPasswordValidator,
 } from '@/middlewares/users.middlewares'
 import {
   registerController,
@@ -18,6 +19,7 @@ import {
   resendEmailVerifyController,
   forgotPasswordController,
   verifyForgotPasswordController,
+  resetPasswordController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -256,5 +258,39 @@ usersRouter.post(
   verifyForgotPasswordValidator,
   wrapRequestHandler(verifyForgotPasswordController)
 )
+
+/**
+ * @swagger
+ * /users/reset-password:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Reset password of a user
+ *   description: Reset password of a user having forgot password token, password and confirm password
+ *   operationId: reset-password
+ *   requestBody:
+ *    description: Forgot password token, password and confirm password
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/ResetPasswordReqBody'
+ *   responses:
+ *    '200':
+ *     description: Reset password success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Reset password success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessAuthentication'
+ *    '422':
+ *     description: Invalid value or missing field
+ */
+usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
 
 export default usersRouter

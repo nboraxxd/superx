@@ -85,6 +85,42 @@ const confirmPasswordSchema: ParamSchema = {
   },
 }
 
+const forgotPasswordTokenSchema: ParamSchema = {
+  trim: true,
+  custom: {
+    options: async (value: string, { req, path }) => {
+      if (!value) {
+        throw new ErrorWithStatusAndPath({
+          message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
+          status_code: HttpStatusCode.Unauthorized,
+          path,
+        })
+      }
+
+      try {
+        const decoded_forgot_password_token = await verifyToken({
+          token: value,
+          secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+        })
+
+        ;(req as Request).decoded_forgot_password_token = decoded_forgot_password_token
+      } catch (error) {
+        if (error instanceof JsonWebTokenError) {
+          throw new ErrorWithStatusAndPath({
+            message: capitalizeFirstLetter(error.message),
+            status_code: HttpStatusCode.Unauthorized,
+            path,
+          })
+        } else {
+          throw error
+        }
+      }
+
+      return true
+    },
+  },
+}
+
 export const accessTokenValidator = validate(
   checkSchema(
     {
@@ -301,43 +337,15 @@ export const forgotPasswordValidator = validate(
 )
 
 export const verifyForgotPasswordValidator = validate(
+  checkSchema({ forgot_password_token: forgotPasswordTokenSchema }, ['body'])
+)
+
+export const resetPasswordValidator = validate(
   checkSchema(
     {
-      forgot_password_token: {
-        trim: true,
-        custom: {
-          options: async (value: string, { req, path }) => {
-            if (!value) {
-              throw new ErrorWithStatusAndPath({
-                message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
-                status_code: HttpStatusCode.Unauthorized,
-                path,
-              })
-            }
-
-            try {
-              const decoded_forgot_password_token = await verifyToken({
-                token: value,
-                secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
-              })
-
-              ;(req as Request).decoded_forgot_password_token = decoded_forgot_password_token
-            } catch (error) {
-              if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatusAndPath({
-                  message: capitalizeFirstLetter(error.message),
-                  status_code: HttpStatusCode.Unauthorized,
-                  path,
-                })
-              } else {
-                throw error
-              }
-            }
-
-            return true
-          },
-        },
-      },
+      forgot_password_token: forgotPasswordTokenSchema,
+      password: passwordSchema,
+      confirm_password: confirmPasswordSchema,
     },
     ['body']
   )
