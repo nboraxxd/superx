@@ -294,6 +294,33 @@ usersRouter.post(
  */
 usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
 
+/**
+ * @swagger
+ * /users/me:
+ *  get:
+ *   tags:
+ *   - users
+ *   summary: Get my profile
+ *   description: Get my profile having access token
+ *   operationId: get-me
+ *   security:
+ *   - bearerAuth: []
+ *   responses:
+ *    '200':
+ *     description: Get my profile success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Get my profile success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessGetMe'
+ *    '401':
+ *     description: Unauthorized
+ */
 usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(getMeController))
 
 export default usersRouter

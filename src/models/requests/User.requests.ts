@@ -108,6 +108,57 @@
  *     refresh_token:
  *      type: string
  *      example: eyJhbGciOiJIUzI1N...
+ *   SuccessGetMe:
+ *    type: object
+ *    properties:
+ *     _id:
+ *      type: string
+ *      example: 123abc...
+ *     name:
+ *      type: string
+ *      example: Bruce Wayne
+ *     email:
+ *      type: string
+ *      example: bruce@wayne.dc
+ *     date_of_birth:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 1970-02-19T08:46:24.000Z
+ *     created_at:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 2021-02-19T08:46:24.000Z
+ *     updated_at:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 2021-02-19T08:46:24.000Z
+ *     verify:
+ *      type: number
+ *      enum: [0, 1, 2]
+ *      example: 0
+ *     tweeter_circle:
+ *      type: array
+ *      items:
+ *       type: string
+ *      example: [123abc..., 456def...]
+ *     bio:
+ *      type: string
+ *      example: I'm Batman
+ *     location:
+ *      type: string
+ *      example: Gotham City
+ *     website:
+ *      type: string
+ *      example: https://brucewayne.dc
+ *     username:
+ *      type: string
+ *      example: bruce_wayne
+ *     avatar:
+ *      type: string
+ *      example: https://brucewayne.dc/avatar.jpg
+ *     cover_photo:
+ *      type: string
+ *      example: https://brucewayne.dc/cover.jpg
  */
 
 export type RegisterReqBody = {
