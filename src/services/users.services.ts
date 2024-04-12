@@ -6,7 +6,7 @@ import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
 import { RegisterReqBody } from '@/models/requests/User.requests'
 import { TokenType, UserVerifyStatus } from '@/constants/enums'
-import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES } from '@/constants/message'
+import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { signToken } from '@/utils/jwt'
 import { hashPassword } from '@/utils/crypto'
 
@@ -183,6 +183,19 @@ class UsersService {
     )
 
     return { access_token, refresh_token }
+  }
+
+  async getMe(user_id: ObjectId) {
+    const user = await databaseService.users.findOne(
+      { _id: user_id },
+      { projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } }
+    )
+
+    if (!user) {
+      return { message: USER_MESSAGES.NOT_FOUND }
+    }
+
+    return user
   }
 }
 

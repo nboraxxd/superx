@@ -20,6 +20,7 @@ import {
   forgotPasswordController,
   verifyForgotPasswordController,
   resetPasswordController,
+  getMeController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -292,5 +293,7 @@ usersRouter.post(
  *     description: Invalid value or missing field
  */
 usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
+
+usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(getMeController))
 
 export default usersRouter
