@@ -8,6 +8,7 @@ import {
   verifyEmailValidator,
   loginValidator,
   forgotPasswordValidator,
+  verifyForgotPasswordValidator,
 } from '@/middlewares/users.middlewares'
 import {
   registerController,
@@ -16,6 +17,7 @@ import {
   logoutController,
   resendEmailVerifyController,
   forgotPasswordController,
+  verifyForgotPasswordController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -28,7 +30,7 @@ const usersRouter = Router()
  *   - users
  *   summary: Register a new user
  *   description: Create a new user having name, email, date of birth, password and confirm password
- *   operationId: registerUser
+ *   operationId: register
  *   requestBody:
  *    description: User information
  *    required: true
@@ -62,7 +64,7 @@ usersRouter.post('/register', registerValidator, wrapRequestHandler(registerCont
  *   - users
  *   summary: Verify email of a user
  *   description: Verify email of a user having email verify token
- *   operationId: verifyEmail
+ *   operationId: verify-email
  *   requestBody:
  *    description: Email verify token
  *    required: true
@@ -94,7 +96,7 @@ usersRouter.post('/verify-email', verifyEmailValidator, wrapRequestHandler(verif
  *   - users
  *   summary: Resend email verify token
  *   description: Resend email verify token of a user
- *   operationId: resendEmailVerify
+ *   operationId: resend-email-verify
  *   security:
  *   - bearerAuth: []
  *   responses:
@@ -123,7 +125,7 @@ usersRouter.post('/resend-email-verify', accessTokenValidator, wrapRequestHandle
  *   - users
  *   summary: Login a user
  *   description: Login a user having email and password
- *   operationId: loginUser
+ *   operationId: login
  *   requestBody:
  *    description: User information
  *    required: true
@@ -157,7 +159,7 @@ usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
  *   - users
  *   summary: Logout a user
  *   description: Logout a user having access token and refresh token
- *   operationId: logoutUser
+ *   operationId: logout
  *   security:
  *   - bearerAuth: []
  *   requestBody:
@@ -191,7 +193,7 @@ usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapReq
  *   - users
  *   summary: Send email with forgot password token
  *   description: Send email with forgot password token to a user having email
- *   operationId: forgotPassword
+ *   operationId: forgot-password
  *   requestBody:
  *    description: Email
  *    required: true
@@ -218,5 +220,41 @@ usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapReq
  *     description: Too many requests
  */
 usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
+
+/**
+ * @swagger
+ * /users/verify-forgot-password:
+ *  post:
+ *   tags:
+ *   - users
+ *   summary: Verify forgot password token
+ *   description: Verify forgot password token of a user having forgot password token
+ *   operationId: verify-forgot-password
+ *   requestBody:
+ *    description: Forgot password token
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/VerifyForgotPasswordReqBody'
+ *   responses:
+ *    '200':
+ *     description: Verify forgot password success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Verify forgot password success
+ *    '401':
+ *     description: Unauthorized
+ */
+usersRouter.post(
+  '/verify-forgot-password',
+  verifyForgotPasswordValidator,
+  wrapRequestHandler(verifyForgotPasswordController)
+)
 
 export default usersRouter

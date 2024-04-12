@@ -1,26 +1,27 @@
+import { ObjectId } from 'mongodb'
+import { HttpStatusCode } from 'axios'
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { HttpStatusCode } from 'axios'
-import { ObjectId } from 'mongodb'
+import { JsonWebTokenError } from 'jsonwebtoken'
 
 import envConfig from '@/config'
 import User from '@/models/schemas/User.schema'
 import usersService from '@/services/users.services'
 import databaseService from '@/services/database.services'
 import { verifyToken } from '@/utils/jwt'
+import { calculateSecondsDifference, capitalizeFirstLetter } from '@/utils/common'
 import { UserVerifyStatus } from '@/constants/enums'
-import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, USER_MESSAGES } from '@/constants/message'
+import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, PASSWORD_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { TokenPayload } from '@/models/requests/Token.requests'
+import { ErrorWithStatusCode } from '@/models/Errors'
 import {
   ForgotPasswordReqBody,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
   VerifyEmailReqBody,
+  VerifyForgotPasswordReqBody,
 } from '@/models/requests/User.requests'
-import { calculateSecondsDifference, capitalizeFirstLetter } from '@/utils/common'
-import { JsonWebTokenError } from 'jsonwebtoken'
-import { ErrorWithStatusCode } from '@/models/Errors'
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   const { name, email, date_of_birth, password } = req.body
@@ -167,4 +168,31 @@ export const forgotPasswordController = async (
   const result = await usersService.forgotPassword((user_id as ObjectId).toString())
 
   return res.json(result)
+}
+
+export const verifyForgotPasswordController = async (
+  req: Request<ParamsDictionary, any, VerifyForgotPasswordReqBody>,
+  res: Response
+) => {
+  const { forgot_password_token } = req.body
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload
+
+  const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+
+  if (!user) {
+    return res.status(HttpStatusCode.NotFound).json({ message: USER_MESSAGES.NOT_FOUND })
+  }
+
+  if (user.forgot_password_token !== forgot_password_token) {
+    return res
+      .status(HttpStatusCode.Unauthorized)
+      .json({ message: AUTHENTICATION_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN })
+  }
+
+  // Nếu forgot_password_token trong collection users là '' thì trả về thông báo đã token
+  if (user.forgot_password_token === '') {
+    return res.json({ message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY })
+  }
+
+  return res.json({ message: PASSWORD_MESSAGES.VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS })
 }

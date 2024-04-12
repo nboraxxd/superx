@@ -292,3 +292,44 @@ export const forgotPasswordValidator = validate(
     ['body']
   )
 )
+
+export const verifyForgotPasswordValidator = validate(
+  checkSchema(
+    {
+      forgot_password_token: {
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatusCode({
+                message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
+                status_code: HttpStatusCode.Unauthorized,
+              })
+            }
+
+            try {
+              const decoded_forgot_password_token = await verifyToken({
+                token: value,
+                secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+              })
+
+              ;(req as Request).decoded_forgot_password_token = decoded_forgot_password_token
+            } catch (error) {
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatusCode({
+                  message: capitalizeFirstLetter(error.message),
+                  status_code: HttpStatusCode.Unauthorized,
+                })
+              } else {
+                throw error
+              }
+            }
+
+            return true
+          },
+        },
+      },
+    },
+    ['body']
+  )
+)

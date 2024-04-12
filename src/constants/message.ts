@@ -49,7 +49,7 @@ export const PASSWORD_MESSAGES = {
     'Confirm password must be 6-50 characters long and contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol',
   CONFIRM_PASSWORD_THE_SAME_AS_PASSWORD: 'Confirm password must be the same as password',
 
-  VERIFY_FORGOT_PASSWORD_SUCCESS: 'Verify forgot password success',
+  VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: 'Verify forgot password token success',
   RESET_PASSWORD_SUCCESS: 'Reset password success',
   OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
   ERROR_OLD_PASSWORD_IS_SAME_AS_NEW: 'The old password should not match the new password',
@@ -70,6 +70,7 @@ export const AUTHENTICATION_MESSAGES = {
   INVALID_EMAIL_VERIFY_TOKEN: 'Invalid email verify token',
   FORGOT_PASSWORD_TOKEN_IS_REQUIRED: 'Forgot password token is required',
   INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
+  FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY: 'Forgot password token has been verified',
 } as const
 
 export const DATE_MESSAGES = {

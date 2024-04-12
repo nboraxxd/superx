@@ -71,6 +71,15 @@
  *      type: string
  *      example: bruce@wayne.dc
  *
+ *   VerifyForgotPasswordReqBody:
+ *    required:
+ *    - forgot_password_token
+ *    type: object
+ *    properties:
+ *     forgot_password_token:
+ *      type: string
+ *      example: eyJhbGciOiJIUzI1N...
+ *
  *   SuccessAuthentication:
  *    type: object
  *    properties:
@@ -105,4 +114,8 @@ export type LogoutReqBody = {
 
 export type ForgotPasswordReqBody = {
   email: string
+}
+
+export type VerifyForgotPasswordReqBody = {
+  forgot_password_token: string
 }
