@@ -3,7 +3,7 @@ import { HttpStatusCode } from 'axios'
 import { RunnableValidationChains } from 'express-validator/src/middlewares/schema'
 import { validationResult, ValidationChain } from 'express-validator'
 
-import { EntityError, ErrorWithStatusCode } from '@/models/Errors'
+import { EntityError, ErrorWithStatusAndPath } from '@/models/Errors'
 
 // sequential processing, stops running validations chain if the previous one fails.
 export const validate = (validation: RunnableValidationChains<ValidationChain>) => {
@@ -22,7 +22,9 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
       const { msg } = errorsObject[key]
 
       // Trả về lỗi không thuộc lỗi của quá trình validate
-      if (msg instanceof ErrorWithStatusCode && msg.status_code !== HttpStatusCode.UnprocessableEntity) return next(msg)
+      if (msg instanceof ErrorWithStatusAndPath && msg.status_code !== HttpStatusCode.UnprocessableEntity) {
+        return next(msg)
+      }
 
       entityError.errors[key] = errorsObject[key]
     }

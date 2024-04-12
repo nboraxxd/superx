@@ -6,7 +6,7 @@ type ErrorsType = Record<string, { msg: string; [key: string]: any }>
 
 type TStatusCode = (typeof HttpStatusCode)[keyof typeof HttpStatusCode]
 
-export class ErrorWithStatusCode {
+export class ErrorWithStatus {
   message: string
   status_code: TStatusCode
 
@@ -16,7 +16,16 @@ export class ErrorWithStatusCode {
   }
 }
 
-export class EntityError extends ErrorWithStatusCode {
+export class ErrorWithStatusAndPath extends ErrorWithStatus {
+  path: string
+
+  constructor({ message, status_code, path }: { message: string; status_code: TStatusCode; path: string }) {
+    super({ message, status_code })
+    this.path = path
+  }
+}
+
+export class EntityError extends ErrorWithStatus {
   errors: ErrorsType
 
   constructor({ message = COMMON_MESSAGES.VALIDATION_ERROR, errors }: { message?: string; errors: ErrorsType }) {

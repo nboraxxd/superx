@@ -13,7 +13,7 @@ import { calculateSecondsDifference, capitalizeFirstLetter } from '@/utils/commo
 import { UserVerifyStatus } from '@/constants/enums'
 import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, PASSWORD_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { TokenPayload } from '@/models/requests/Token.requests'
-import { ErrorWithStatusCode } from '@/models/Errors'
+import { ErrorWithStatusAndPath } from '@/models/Errors'
 import {
   ForgotPasswordReqBody,
   LoginReqBody,
@@ -92,9 +92,10 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
 
         return res.json(result)
       } else {
-        throw new ErrorWithStatusCode({
+        throw new ErrorWithStatusAndPath({
           message: capitalizeFirstLetter(error.message),
           status_code: HttpStatusCode.Unauthorized,
+          path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `email_verify_token`
         })
       }
     } else {
@@ -154,9 +155,10 @@ export const forgotPasswordController = async (
 
           return res.json(result)
         } else {
-          throw new ErrorWithStatusCode({
+          throw new ErrorWithStatusAndPath({
             message: capitalizeFirstLetter(error.message),
             status_code: HttpStatusCode.Unauthorized,
+            path: Object.keys(req.body)[0], // Lấy key của object đầu tiên trong req.body là `forgot_password_token`
           })
         }
       } else {

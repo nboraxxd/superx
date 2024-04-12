@@ -9,7 +9,7 @@ import { validate } from '@/utils/validation'
 import { hashPassword } from '@/utils/crypto'
 import { verifyToken } from '@/utils/jwt'
 import { capitalizeFirstLetter } from '@/utils/common'
-import { ErrorWithStatusCode } from '@/models/Errors'
+import { ErrorWithStatusAndPath } from '@/models/Errors'
 import {
   AUTHENTICATION_MESSAGES,
   DATE_MESSAGES,
@@ -90,14 +90,15 @@ export const accessTokenValidator = validate(
     {
       Authorization: {
         custom: {
-          options: async (value: string, { req }) => {
+          options: async (value: string, { req, path }) => {
             // Không nên dùng value.replace('Bearer ', '') vì nếu value không chứa 'Bearer ' thì vẫn nhận được value ban đầu
             const access_token = (value || '').split('Bearer ')[1]
 
             if (!access_token) {
-              throw new ErrorWithStatusCode({
+              throw new ErrorWithStatusAndPath({
                 message: AUTHENTICATION_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
                 status_code: HttpStatusCode.Unauthorized,
+                path,
               })
             }
 
@@ -110,9 +111,10 @@ export const accessTokenValidator = validate(
               ;(req as Request).decoded_authorization = decoded_authorization
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatusCode({
+                throw new ErrorWithStatusAndPath({
                   message: capitalizeFirstLetter(error.message),
                   status_code: HttpStatusCode.Unauthorized,
+                  path,
                 })
               } else {
                 throw error
@@ -131,11 +133,12 @@ export const refreshTokenValidator = validate(
     {
       refresh_token: {
         custom: {
-          options: async (value: string, { req }) => {
+          options: async (value: string, { req, path }) => {
             if (!value) {
-              throw new ErrorWithStatusCode({
+              throw new ErrorWithStatusAndPath({
                 message: AUTHENTICATION_MESSAGES.REFRESH_TOKEN_IS_REQUIRED,
                 status_code: HttpStatusCode.Unauthorized,
+                path,
               })
             }
 
@@ -149,18 +152,20 @@ export const refreshTokenValidator = validate(
               ])
 
               if (!refresh_token) {
-                throw new ErrorWithStatusCode({
+                throw new ErrorWithStatusAndPath({
                   message: AUTHENTICATION_MESSAGES.REFRESH_TOKEN_USED_OR_NOT_EXIST,
                   status_code: HttpStatusCode.Unauthorized,
+                  path,
                 })
               }
 
               ;(req as Request).decoded_refresh_token = decoded_refresh_token
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatusCode({
+                throw new ErrorWithStatusAndPath({
                   message: capitalizeFirstLetter(error.message),
                   status_code: HttpStatusCode.Unauthorized,
+                  path,
                 })
               } else {
                 throw error
@@ -208,11 +213,12 @@ export const verifyEmailValidator = validate(
       email_verify_token: {
         trim: true,
         custom: {
-          options: async (value: string, { req }) => {
+          options: async (value: string, { req, path }) => {
             if (!value) {
-              throw new ErrorWithStatusCode({
+              throw new ErrorWithStatusAndPath({
                 message: AUTHENTICATION_MESSAGES.EMAIL_VERIFY_TOKEN_IS_REQUIRED,
                 status_code: HttpStatusCode.Unauthorized,
+                path,
               })
             }
 
@@ -225,9 +231,10 @@ export const verifyEmailValidator = validate(
               ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatusCode({
+                throw new ErrorWithStatusAndPath({
                   message: capitalizeFirstLetter(error.message),
                   status_code: HttpStatusCode.Unauthorized,
+                  path,
                 })
               } else {
                 throw error
@@ -299,11 +306,12 @@ export const verifyForgotPasswordValidator = validate(
       forgot_password_token: {
         trim: true,
         custom: {
-          options: async (value: string, { req }) => {
+          options: async (value: string, { req, path }) => {
             if (!value) {
-              throw new ErrorWithStatusCode({
+              throw new ErrorWithStatusAndPath({
                 message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
                 status_code: HttpStatusCode.Unauthorized,
+                path,
               })
             }
 
@@ -316,9 +324,10 @@ export const verifyForgotPasswordValidator = validate(
               ;(req as Request).decoded_forgot_password_token = decoded_forgot_password_token
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatusCode({
+                throw new ErrorWithStatusAndPath({
                   message: capitalizeFirstLetter(error.message),
                   status_code: HttpStatusCode.Unauthorized,
+                  path,
                 })
               } else {
                 throw error

@@ -1,12 +1,12 @@
 import { HttpStatusCode } from 'axios'
 import { NextFunction, Request, Response } from 'express'
 
-import { ErrorWithStatusCode } from '@/models/Errors'
+import { ErrorWithStatus } from '@/models/Errors'
 
 export function defaultErrorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
   console.log('🍓 ERROR:', err.message)
 
-  if (err instanceof ErrorWithStatusCode) {
+  if (err instanceof ErrorWithStatus) {
     const { status_code, ...errorExcludedStatusCode } = err
 
     return res.status(status_code).json(errorExcludedStatusCode)
