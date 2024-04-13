@@ -3,7 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 import { TokenPayload } from '@/models/requests/Token.requests'
 
 type SignTokenType = {
-  payload: any
+  payload: string | object | Buffer
   privateKey: string
   options?: SignOptions
 }

@@ -113,9 +113,9 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
 }
 
 export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
-  const { _id: user_id } = req.user as User
+  const { _id: user_id, verify } = req.user as User
 
-  const result = await usersService.login((user_id as ObjectId).toString())
+  const result = await usersService.login((user_id as ObjectId).toString(), verify)
 
   return res.json({ message: AUTHENTICATION_MESSAGES.LOGIN_SUCCESS, result })
 }
@@ -132,7 +132,7 @@ export const forgotPasswordController = async (
   req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
   res: Response
 ) => {
-  const { _id: user_id, forgot_password_token } = req.user as User
+  const { _id: user_id, forgot_password_token, verify } = req.user as User
 
   if (forgot_password_token !== '') {
     try {
@@ -155,7 +155,7 @@ export const forgotPasswordController = async (
     } catch (error) {
       if (error instanceof JsonWebTokenError) {
         if (error.name === 'TokenExpiredError') {
-          const result = await usersService.forgotPassword((user_id as ObjectId).toString())
+          const result = await usersService.forgotPassword((user_id as ObjectId).toString(), verify)
 
           return res.json(result)
         } else {
@@ -171,7 +171,7 @@ export const forgotPasswordController = async (
     }
   }
 
-  const result = await usersService.forgotPassword((user_id as ObjectId).toString())
+  const result = await usersService.forgotPassword((user_id as ObjectId).toString(), verify)
 
   return res.json(result)
 }
@@ -229,7 +229,7 @@ export const resetPasswordController = async (
     return res.json({ message: AUTHENTICATION_MESSAGES.FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY })
   }
 
-  const result = await usersService.resetPassword(user_id, password)
+  const result = await usersService.resetPassword({ user_id, password, verify: user.verify })
 
   return res.json({ message: PASSWORD_MESSAGES.RESET_PASSWORD_SUCCESS, result })
 }
