@@ -8,8 +8,6 @@ type UserType = {
   email: string
   date_of_birth: Date
   password: string
-  created_at?: Date
-  updated_at?: Date
   email_verify_token?: string // jwt hoặc '' nếu đã xác thực email
   forgot_password_token?: string // jwt hoặc '' nếu đã xác thực email
   verify?: UserVerifyStatus
@@ -20,6 +18,8 @@ type UserType = {
   username?: string // optional
   avatar?: string // optional
   cover_photo?: string // optional
+  created_at?: Date
+  updated_at?: Date
 }
 
 export default class User {
@@ -28,8 +28,6 @@ export default class User {
   email: string
   date_of_birth: Date
   password: string
-  created_at: Date
-  updated_at: Date
   email_verify_token: string
   forgot_password_token: string
   verify: UserVerifyStatus
@@ -40,6 +38,8 @@ export default class User {
   username: string
   avatar: string
   cover_photo: string
+  created_at: Date
+  updated_at: Date
 
   constructor(user: UserType) {
     const currentDate = new Date()
@@ -49,8 +49,6 @@ export default class User {
     this.email = user.email
     this.date_of_birth = user.date_of_birth
     this.password = user.password
-    this.created_at = user.created_at || currentDate
-    this.updated_at = user.updated_at || currentDate
     this.email_verify_token = user.email_verify_token || ''
     this.forgot_password_token = user.forgot_password_token || ''
     this.verify = user.verify || UserVerifyStatus.Unverified
@@ -61,5 +59,7 @@ export default class User {
     this.username = user.username || ''
     this.avatar = user.avatar || ''
     this.cover_photo = user.cover_photo || ''
+    this.created_at = user.created_at || currentDate
+    this.updated_at = user.updated_at || currentDate
   }
 }

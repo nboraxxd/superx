@@ -1,10 +1,12 @@
 import { ObjectId } from 'mongodb'
+import { HttpStatusCode } from 'axios'
 
 import envConfig from '@/config'
 import databaseService from '@/services/database.services'
 import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
-import { RegisterReqBody } from '@/models/requests/User.requests'
+import { RegisterReqBody, UpdateMeReqBody } from '@/models/requests/User.requests'
+import { ErrorWithStatus } from '@/models/Errors'
 import { TokenType, UserVerifyStatus } from '@/constants/enums'
 import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { signToken } from '@/utils/jwt'
@@ -196,6 +198,35 @@ class UsersService {
     }
 
     return user
+  }
+
+  async updateMe(user_id: ObjectId, payload: Omit<UpdateMeReqBody, 'date_of_birth'> & { date_of_birth?: Date }) {
+    // Remove fields with undefined values from payload
+    Object.keys(payload).forEach((key) => {
+      if (payload[key as keyof typeof payload] === undefined) {
+        delete payload[key as keyof typeof payload]
+      }
+    })
+
+    const result = await databaseService.users.findOneAndUpdate(
+      { _id: user_id },
+      {
+        $set: {
+          ...payload,
+        },
+        $currentDate: { updated_at: true },
+      },
+      {
+        projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 },
+        returnDocument: 'after',
+      }
+    )
+
+    if (!result) {
+      throw new ErrorWithStatus({ message: USER_MESSAGES.NOT_FOUND, status_code: HttpStatusCode.NotFound })
+    }
+
+    return { result }
   }
 }
 

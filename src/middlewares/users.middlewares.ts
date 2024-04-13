@@ -1,4 +1,4 @@
-import { Request } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { HttpStatusCode } from 'axios'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ParamSchema, checkSchema } from 'express-validator'
@@ -9,14 +9,21 @@ import { validate } from '@/utils/validation'
 import { hashPassword } from '@/utils/crypto'
 import { verifyToken } from '@/utils/jwt'
 import { capitalizeFirstLetter } from '@/utils/common'
-import { ErrorWithStatusAndPath } from '@/models/Errors'
+import { ErrorWithStatus, ErrorWithStatusAndPath } from '@/models/Errors'
+import { TokenPayload } from '@/models/requests/Token.requests'
+import { UserVerifyStatus } from '@/constants/enums'
 import {
   AUTHENTICATION_MESSAGES,
+  BIO_MESSAGES,
   DATE_MESSAGES,
   EMAIL_MESSAGES,
+  IMAGE_MESSAGES,
+  LOCATION_MESSAGES,
   NAME_MESSAGES,
   PASSWORD_MESSAGES,
+  USERNAME_MESSAGES,
   USER_MESSAGES,
+  WEBSITE_MESSAGES,
 } from '@/constants/message'
 
 const nameSchema: ParamSchema = {
@@ -121,6 +128,15 @@ const forgotPasswordTokenSchema: ParamSchema = {
   },
 }
 
+const notAllowedSchema = <M extends string>(errorMessage: M): ParamSchema => {
+  return {
+    exists: {
+      negated: true,
+      errorMessage,
+    },
+  }
+}
+
 export const accessTokenValidator = validate(
   checkSchema(
     {
@@ -216,6 +232,21 @@ export const refreshTokenValidator = validate(
     ['body']
   )
 )
+
+export const verifiedUserValidator = (req: Request, _res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_authorization as TokenPayload
+
+  if (verify !== UserVerifyStatus.Verified) {
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGES.NOT_VERIFIED_OR_BANDED,
+        status_code: HttpStatusCode.Forbidden,
+      })
+    )
+  }
+
+  next()
+}
 
 export const registerValidator = validate(
   checkSchema(
@@ -346,6 +377,66 @@ export const resetPasswordValidator = validate(
       forgot_password_token: forgotPasswordTokenSchema,
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,
+    },
+    ['body']
+  )
+)
+
+export const updateMeValidator = validate(
+  checkSchema(
+    {
+      name: { ...nameSchema, optional: true },
+      date_of_birth: { ...dateOfBirthSchema, optional: true },
+      bio: {
+        isString: { errorMessage: BIO_MESSAGES.STRING },
+        isLength: { options: { min: 1, max: 200 }, errorMessage: BIO_MESSAGES.LENGTH },
+        optional: true,
+      },
+      location: {
+        isString: { errorMessage: LOCATION_MESSAGES.STRING },
+        isLength: { options: { min: 1, max: 200 }, errorMessage: LOCATION_MESSAGES.LENGTH },
+        optional: true,
+      },
+      website: {
+        trim: true,
+        isURL: { errorMessage: WEBSITE_MESSAGES.INVALID },
+        isLength: { options: { min: 1, max: 100 }, errorMessage: WEBSITE_MESSAGES.LENGTH },
+        optional: true,
+      },
+      username: {
+        trim: true,
+        isString: { errorMessage: USERNAME_MESSAGES.STRING },
+        matches: { options: /^(?=.*[a-zA-Z])[a-zA-Z0-9_]{4,15}$/, errorMessage: USERNAME_MESSAGES.INVALID },
+        custom: {
+          options: async (value: string) => {
+            const user = await databaseService.users.findOne({ username: value })
+
+            if (user) {
+              throw new Error(USERNAME_MESSAGES.ALREADY_EXISTS)
+            }
+
+            return true
+          },
+        },
+        optional: true,
+      },
+      avatar: {
+        trim: true,
+        isURL: { errorMessage: IMAGE_MESSAGES.URL_IS_INVALID },
+        isLength: { options: { min: 1, max: 400 }, errorMessage: IMAGE_MESSAGES.LENGTH_OF_URL },
+        optional: true,
+      },
+      cover_photo: {
+        trim: true,
+        isURL: { errorMessage: IMAGE_MESSAGES.URL_IS_INVALID },
+        isLength: { options: { min: 1, max: 400 }, errorMessage: IMAGE_MESSAGES.LENGTH_OF_URL },
+        optional: true,
+      },
+      email: notAllowedSchema(EMAIL_MESSAGES.NOT_ALLOWED_TO_CHANGE_EMAIL),
+      password: notAllowedSchema(PASSWORD_MESSAGES.CANNOT_CHANGE_PASSWORD_BY_THIS_METHOD),
+      email_verify_token: notAllowedSchema(AUTHENTICATION_MESSAGES.NOT_ALLOWED_TO_CHANGE_EMAIL_VERIFY_TOKEN),
+      forgot_password_token: notAllowedSchema(AUTHENTICATION_MESSAGES.NOT_ALLOWED_TO_CHANGE_FORGOT_PASSWORD_TOKEN),
+      verify: notAllowedSchema(USER_MESSAGES.NOT_ALLOWED_TO_CHANGE_VERIFY_STATUS),
     },
     ['body']
   )

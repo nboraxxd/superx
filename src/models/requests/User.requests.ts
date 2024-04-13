@@ -99,6 +99,35 @@
  *      format: password
  *      example: Abcd12345@#
  *
+ *   UpdateMeReqBody:
+ *    type: object
+ *    properties:
+ *     name:
+ *      type: string
+ *      example: Bruce Wayne
+ *     date_of_birth:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 1970-02-19T08:46:24.000Z
+ *     bio:
+ *      type: string
+ *      example: I'm rich
+ *     location:
+ *      type: string
+ *      example: Gotham City
+ *     website:
+ *      type: string
+ *      example: https://brucewayne.dc
+ *     username:
+ *      type: string
+ *      example: bruce_wayne
+ *     avatar:
+ *      type: string
+ *      example: https://brucewayne.dc/avatar.jpg
+ *     cover_photo:
+ *      type: string
+ *      example: https://brucewayne.dc/cover.jpg
+ *
  *   SuccessAuthentication:
  *    type: object
  *    properties:
@@ -124,14 +153,6 @@
  *      type: string
  *      format: ISO 8601
  *      example: 1970-02-19T08:46:24.000Z
- *     created_at:
- *      type: string
- *      format: ISO 8601
- *      example: 2021-02-19T08:46:24.000Z
- *     updated_at:
- *      type: string
- *      format: ISO 8601
- *      example: 2021-02-19T08:46:24.000Z
  *     verify:
  *      type: number
  *      enum: [0, 1, 2]
@@ -143,7 +164,7 @@
  *      example: [123abc..., 456def...]
  *     bio:
  *      type: string
- *      example: I'm Batman
+ *      example: I'm rich
  *     location:
  *      type: string
  *      example: Gotham City
@@ -159,7 +180,17 @@
  *     cover_photo:
  *      type: string
  *      example: https://brucewayne.dc/cover.jpg
+ *     created_at:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 2021-02-19T08:46:24.000Z
+ *     updated_at:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 2021-02-19T08:46:24.000Z
  */
+
+import User from '@/models/schemas/User.schema'
 
 export type RegisterReqBody = {
   name: string
@@ -195,3 +226,7 @@ export type ResetPasswordReqBody = {
   password: string
   confirm_password: string
 }
+
+export type UpdateMeReqBody = Partial<
+  Pick<User, 'name' | 'bio' | 'location' | 'website' | 'username' | 'avatar' | 'cover_photo'>
+> & { date_of_birth?: string }

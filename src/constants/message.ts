@@ -10,9 +10,10 @@ export const NAME_MESSAGES = {
 
 export const USER_MESSAGES = {
   NOT_FOUND: 'User not found',
-  NOT_VERIFIED: 'User not verified',
+  NOT_VERIFIED_OR_BANDED: 'User not verified or banned',
   INVALID: 'User is invalid',
   ID_IS_INVALID: 'User id is invalid',
+  NOT_ALLOWED_TO_CHANGE_VERIFY_STATUS: 'Not allowed to change verify status',
 
   GET_ME_SUCCESS: 'Get my profile success',
   UPDATE_ME_SUCCESS: 'Update my profile success',
@@ -20,8 +21,9 @@ export const USER_MESSAGES = {
 } as const
 
 export const USERNAME_MESSAGES = {
+  STRING: 'Username must be a string',
   INVALID: 'Username must be 4-15 characters long and contain only letters, numbers, underscores and not only numbers',
-  EXISTED: 'Username existed',
+  ALREADY_EXISTS: 'Username already exists',
 } as const
 
 export const EMAIL_MESSAGES = {
@@ -33,6 +35,7 @@ export const EMAIL_MESSAGES = {
   VERIFY_SUCCESS: 'Email verify success',
   RESEND_EMAIL_VERIFY_SUCCESS: 'Resend email verify success',
   CHECK_EMAIL_TO_RESET_PASSWORD: 'Check email to reset password',
+  NOT_ALLOWED_TO_CHANGE_EMAIL: 'Not allowed to change email',
 } as const
 
 export const PASSWORD_MESSAGES = {
@@ -52,7 +55,8 @@ export const PASSWORD_MESSAGES = {
   VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS: 'Verify forgot password token success',
   RESET_PASSWORD_SUCCESS: 'Reset password success',
   OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
-  NEW_PASSWORD_MUST_BE_DIFF_FROM_OLD_PASSWORD: 'The new password must be different from the old password.',
+  NEW_PASSWORD_MUST_BE_DIFF_FROM_OLD_PASSWORD: 'The new password must be different from the old password',
+  CANNOT_CHANGE_PASSWORD_BY_THIS_METHOD: 'Cannot change password by this method',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
 } as const
 
@@ -63,14 +67,19 @@ export const AUTHENTICATION_MESSAGES = {
   LOGOUT_SUCCESS: 'Logout success',
 
   ACCESS_TOKEN_IS_REQUIRED: 'Access token is required',
+
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
   REFRESH_TOKEN_USED_OR_NOT_EXIST: 'Refresh token has been used or does not exist',
   REFRESH_TOKEN_SUCCESS: 'Refresh token success',
+
   EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
   INVALID_EMAIL_VERIFY_TOKEN: 'Invalid email verify token',
+  NOT_ALLOWED_TO_CHANGE_EMAIL_VERIFY_TOKEN: 'Not allowed to change email verify token',
+
   FORGOT_PASSWORD_TOKEN_IS_REQUIRED: 'Forgot password token is required',
   INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
   FORGOT_PASSWORD_TOKEN_HAS_BEEN_VERIFY: 'Forgot password token has been verified',
+  NOT_ALLOWED_TO_CHANGE_FORGOT_PASSWORD_TOKEN: 'Not allowed to change forgot password token',
 } as const
 
 export const DATE_MESSAGES = {

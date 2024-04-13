@@ -10,6 +10,8 @@ import {
   forgotPasswordValidator,
   verifyForgotPasswordValidator,
   resetPasswordValidator,
+  verifiedUserValidator,
+  updateMeValidator,
 } from '@/middlewares/users.middlewares'
 import {
   registerController,
@@ -21,6 +23,7 @@ import {
   verifyForgotPasswordController,
   resetPasswordController,
   getMeController,
+  updateMeController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -322,5 +325,49 @@ usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(r
  *     description: Unauthorized
  */
 usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(getMeController))
+
+/**
+ * @swagger
+ * /users/me:
+ *  patch:
+ *   tags:
+ *   - users
+ *   summary: Update my profile
+ *   description: Update my profile having access token and user information
+ *   operationId: update-me
+ *   security:
+ *   - bearerAuth: []
+ *   requestBody:
+ *    description: User information
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/UpdateMeReqBody'
+ *   responses:
+ *    '200':
+ *     description: Update my profile success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Update my profile success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessGetMe'
+ *    '401':
+ *     description: Unauthorized
+ *    '422':
+ *     description: Invalid value or missing field
+ */
+usersRouter.patch(
+  '/me',
+  accessTokenValidator,
+  verifiedUserValidator,
+  updateMeValidator,
+  wrapRequestHandler(updateMeController)
+)
 
 export default usersRouter

@@ -20,6 +20,7 @@ import {
   LogoutReqBody,
   RegisterReqBody,
   ResetPasswordReqBody,
+  UpdateMeReqBody,
   VerifyEmailReqBody,
   VerifyForgotPasswordReqBody,
 } from '@/models/requests/User.requests'
@@ -240,4 +241,26 @@ export const getMeController = async (req: Request, res: Response) => {
   const result = await usersService.getMe(new ObjectId(user_id))
 
   return res.json({ message: USER_MESSAGES.GET_ME_SUCCESS, result })
+}
+
+export const updateMeController = async (
+  req: Request<ParamsDictionary, any, UpdateMeReqBody>,
+  res: Response<any, UpdateMeReqBody>
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { name, date_of_birth, bio, location, avatar, website, username, cover_photo } = res.locals
+  console.log('🔥 ~ res.locals:', name, date_of_birth, bio, location, avatar, website, username, cover_photo)
+
+  const result = await usersService.updateMe(new ObjectId(user_id), {
+    name,
+    date_of_birth: date_of_birth ? new Date(date_of_birth) : undefined,
+    bio,
+    location,
+    avatar,
+    website,
+    username,
+    cover_photo,
+  })
+
+  return res.json({ message: USER_MESSAGES.UPDATE_ME_SUCCESS, result })
 }
