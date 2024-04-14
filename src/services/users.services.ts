@@ -63,29 +63,30 @@ class UsersService {
     const user_id = new ObjectId()
     const unverified = UserVerifyStatus.Unverified
 
-    const [email_verify_token, access_token, refresh_token] = await Promise.all([
-      this.signEmailVerifyToken(user_id.toString(), unverified),
-      this.signAccessToken(user_id.toString(), unverified),
-      this.signRefreshToken(user_id.toString(), unverified),
+    const email_verify_token = await this.signEmailVerifyToken(user_id.toHexString(), unverified)
+
+    await databaseService.users.insertOne(
+      new User({
+        _id: user_id,
+        name,
+        email,
+        username: `user${user_id.toHexString()}`,
+        date_of_birth: new Date(date_of_birth),
+        password: hashPassword(password),
+        email_verify_token,
+      })
+    )
+
+    const [access_token, refresh_token] = await Promise.all([
+      this.signAccessToken(user_id.toHexString(), unverified),
+      this.signRefreshToken(user_id.toHexString(), unverified),
     ])
+
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+    )
 
     console.log('🍨 email_verify_token:', email_verify_token)
-
-    await Promise.all([
-      databaseService.users.insertOne(
-        new User({
-          _id: user_id,
-          name,
-          email,
-          date_of_birth: new Date(date_of_birth),
-          password: hashPassword(password),
-          email_verify_token,
-        })
-      ),
-      databaseService.refreshTokens.insertOne(
-        new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
-      ),
-    ])
 
     return { access_token, refresh_token }
   }
@@ -227,6 +228,28 @@ class UsersService {
     }
 
     return { result }
+  }
+
+  async getProfile(username: string) {
+    const user = await databaseService.users.findOne(
+      { username },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          verify: 0,
+          created_at: 0,
+          updated_at: 0,
+        },
+      }
+    )
+
+    if (!user) {
+      throw new ErrorWithStatus({ message: USER_MESSAGES.NOT_FOUND, status_code: HttpStatusCode.NotFound })
+    }
+
+    return { user }
   }
 }
 

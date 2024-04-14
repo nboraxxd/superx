@@ -12,6 +12,7 @@ import {
   resetPasswordValidator,
   verifiedUserValidator,
   updateMeValidator,
+  getProfileValidator,
 } from '@/middlewares/users.middlewares'
 import {
   registerController,
@@ -24,6 +25,7 @@ import {
   resetPasswordController,
   getMeController,
   updateMeController,
+  getProfileController,
 } from '@/controllers/users.controllers'
 
 const usersRouter = Router()
@@ -369,5 +371,42 @@ usersRouter.patch(
   updateMeValidator,
   wrapRequestHandler(updateMeController)
 )
+
+/**
+ * @swagger
+ * /users/{username}:
+ *  get:
+ *   tags:
+ *   - users
+ *   summary: Get user info
+ *   description: Get user info by username
+ *   operationId: get-user-profile
+ *   parameters:
+ *    - in: path
+ *      name: username
+ *      required: true
+ *      description: The username that needs to be fetched. Use `bruce_wayne` for testing.
+ *      schema:
+ *       type: string
+ *       example: bruce_wayne
+ *   responses:
+ *    '200':
+ *     description: Get user profile success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Get user profile success
+ *         result:
+ *          $ref: '#/components/schemas/SuccessGetUserProfile'
+ *    '404':
+ *     description: User not found
+ *    '422':
+ *     description: Invalid value or missing field
+ */
+usersRouter.get('/:username', getProfileValidator, wrapRequestHandler(getProfileController))
 
 export default usersRouter

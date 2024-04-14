@@ -137,6 +137,7 @@
  *     refresh_token:
  *      type: string
  *      example: eyJhbGciOiJIUzI1N...
+ *
  *   SuccessGetMe:
  *    type: object
  *    properties:
@@ -156,7 +157,7 @@
  *     verify:
  *      type: number
  *      enum: [0, 1, 2]
- *      example: 0
+ *      example: 1
  *     tweeter_circle:
  *      type: array
  *      items:
@@ -188,6 +189,46 @@
  *      type: string
  *      format: ISO 8601
  *      example: 2021-02-19T08:46:24.000Z
+ *
+ *   SuccessGetUserProfile:
+ *    type: object
+ *    properties:
+ *     _id:
+ *      type: string
+ *      example: 123abc...
+ *     name:
+ *      type: string
+ *      example: Bruce Wayne
+ *     email:
+ *      type: string
+ *      example: bruce@wayne.dc
+ *     date_of_birth:
+ *      type: string
+ *      format: ISO 8601
+ *      example: 1970-02-19T08:46:24.000Z
+ *     tweeter_circle:
+ *      type: array
+ *      items:
+ *       type: string
+ *      example: [123abc..., 456def...]
+ *     bio:
+ *      type: string
+ *      example: I'm rich
+ *     location:
+ *      type: string
+ *      example: Gotham City
+ *     website:
+ *      type: string
+ *      example: https://brucewayne.dc
+ *     username:
+ *      type: string
+ *      example: bruce_wayne
+ *     avatar:
+ *      type: string
+ *      example: https://brucewayne.dc/avatar.jpg
+ *     cover_photo:
+ *      type: string
+ *      example: https://brucewayne.dc/cover.jpg
  */
 
 import User from '@/models/schemas/User.schema'
@@ -230,3 +271,7 @@ export type ResetPasswordReqBody = {
 export type UpdateMeReqBody = Partial<
   Pick<User, 'name' | 'bio' | 'location' | 'website' | 'username' | 'avatar' | 'cover_photo'>
 > & { date_of_birth?: string }
+
+export type GetProfileReqParams = {
+  username: string
+}

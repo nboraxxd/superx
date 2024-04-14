@@ -26,10 +26,11 @@ import {
   WEBSITE_MESSAGES,
 } from '@/constants/message'
 
+// do trim sẽ chuyển giá trị về string type, nên phải check isString trước trim
 const nameSchema: ParamSchema = {
+  isString: { errorMessage: NAME_MESSAGES.STRING },
   trim: true,
   notEmpty: { errorMessage: NAME_MESSAGES.REQUIRED },
-  isString: { errorMessage: NAME_MESSAGES.STRING },
   isLength: { options: { min: 1, max: 100 }, errorMessage: NAME_MESSAGES.LENGTH },
 }
 
@@ -40,6 +41,7 @@ const baseEmailSchema: ParamSchema = {
 }
 
 const dateOfBirthSchema: ParamSchema = {
+  isString: { errorMessage: PASSWORD_MESSAGES.STRING },
   trim: true,
   notEmpty: { errorMessage: DATE_MESSAGES.REQUIRED },
   isISO8601: {
@@ -52,9 +54,9 @@ const dateOfBirthSchema: ParamSchema = {
 }
 
 const passwordSchema: ParamSchema = {
+  isString: { errorMessage: PASSWORD_MESSAGES.STRING },
   trim: true,
   notEmpty: { errorMessage: PASSWORD_MESSAGES.REQUIRED },
-  isString: { errorMessage: PASSWORD_MESSAGES.STRING },
   isLength: { options: { min: 6, max: 50 }, errorMessage: PASSWORD_MESSAGES.LENGTH },
   isStrongPassword: {
     options: {
@@ -68,9 +70,9 @@ const passwordSchema: ParamSchema = {
 }
 
 const confirmPasswordSchema: ParamSchema = {
+  isString: { errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_IS_STRING },
   trim: true,
   notEmpty: { errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED },
-  isString: { errorMessage: PASSWORD_MESSAGES.CONFIRM_PASSWORD_IS_STRING },
   isLength: { options: { min: 6, max: 50 }, errorMessage: PASSWORD_MESSAGES.LENGTH_OF_CONFIRM_PASSWORD },
   isStrongPassword: {
     options: {
@@ -404,9 +406,9 @@ export const updateMeValidator = validate(
         optional: true,
       },
       username: {
-        trim: true,
         isString: { errorMessage: USERNAME_MESSAGES.STRING },
-        matches: { options: /^(?=.*[a-zA-Z])[a-zA-Z0-9_]{4,15}$/, errorMessage: USERNAME_MESSAGES.INVALID },
+        trim: true,
+        matches: { options: /^(?=.*[a-zA-Z])[a-zA-Z0-9_]{4,50}$/, errorMessage: USERNAME_MESSAGES.INVALID },
         custom: {
           options: async (value: string) => {
             const user = await databaseService.users.findOne({ username: value })
@@ -439,5 +441,16 @@ export const updateMeValidator = validate(
       verify: notAllowedSchema(USER_MESSAGES.NOT_ALLOWED_TO_CHANGE_VERIFY_STATUS),
     },
     ['body']
+  )
+)
+
+export const getProfileValidator = validate(
+  checkSchema(
+    {
+      username: {
+        matches: { options: /^(?=.*[a-zA-Z])[a-zA-Z0-9_]{4,50}$/, errorMessage: USERNAME_MESSAGES.INVALID },
+      },
+    },
+    ['params']
   )
 )

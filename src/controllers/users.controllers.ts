@@ -16,6 +16,7 @@ import { TokenPayload } from '@/models/requests/Token.requests'
 import { ErrorWithStatusAndPath } from '@/models/Errors'
 import {
   ForgotPasswordReqBody,
+  GetProfileReqParams,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
@@ -116,7 +117,7 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
 export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
   const { _id: user_id, verify } = req.user as User
 
-  const result = await usersService.login((user_id as ObjectId).toString(), verify)
+  const result = await usersService.login((user_id as ObjectId).toHexString(), verify)
 
   return res.json({ message: AUTHENTICATION_MESSAGES.LOGIN_SUCCESS, result })
 }
@@ -156,7 +157,7 @@ export const forgotPasswordController = async (
     } catch (error) {
       if (error instanceof JsonWebTokenError) {
         if (error.name === 'TokenExpiredError') {
-          const result = await usersService.forgotPassword((user_id as ObjectId).toString(), verify)
+          const result = await usersService.forgotPassword((user_id as ObjectId).toHexString(), verify)
 
           return res.json(result)
         } else {
@@ -172,7 +173,7 @@ export const forgotPasswordController = async (
     }
   }
 
-  const result = await usersService.forgotPassword((user_id as ObjectId).toString(), verify)
+  const result = await usersService.forgotPassword((user_id as ObjectId).toHexString(), verify)
 
   return res.json(result)
 }
@@ -249,7 +250,6 @@ export const updateMeController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { name, date_of_birth, bio, location, avatar, website, username, cover_photo } = res.locals
-  console.log('🔥 ~ res.locals:', name, date_of_birth, bio, location, avatar, website, username, cover_photo)
 
   const result = await usersService.updateMe(new ObjectId(user_id), {
     name,
@@ -263,4 +263,12 @@ export const updateMeController = async (
   })
 
   return res.json({ message: USER_MESSAGES.UPDATE_ME_SUCCESS, result })
+}
+
+export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response) => {
+  const { username } = req.params
+
+  const result = await usersService.getProfile(username)
+
+  return res.json({ message: USER_MESSAGES.GET_USER_PROFILE_SUCCESS, result })
 }

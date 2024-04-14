@@ -22,7 +22,8 @@ export const USER_MESSAGES = {
 
 export const USERNAME_MESSAGES = {
   STRING: 'Username must be a string',
-  INVALID: 'Username must be 4-15 characters long and contain only letters, numbers, underscores and not only numbers',
+  LENGTH: 'Username must be from 4 to 50 characters long',
+  INVALID: 'Username must be 4-50 characters long and contain only letters, numbers, underscores and not only numbers',
   ALREADY_EXISTS: 'Username already exists',
 } as const
 
