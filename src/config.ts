@@ -5,7 +5,8 @@ import argv from 'minimist'
 import { config } from 'dotenv'
 
 const options = argv(process.argv.slice(2))
-console.log('🔥 ~ options:', options)
+
+export const isProduction = options.env === 'production'
 
 config({
   path: options.env ? `.env.${options.env}` : '.env.development',
@@ -38,6 +39,8 @@ const configSchema = z.object({
   JWT_SECRET_REFRESH_TOKEN: z.string(),
   JWT_SECRET_EMAIL_VERIFY_TOKEN: z.string(),
   JWT_SECRET_FORGOT_PASSWORD_TOKEN: z.string(),
+
+  CLIENT_URL: z.string(),
 
   JWT_ACCESS_TOKEN_EXPIRES_IN: z.string(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: z.string(),

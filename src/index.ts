@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 
@@ -49,7 +50,11 @@ const app = express()
 // kết nối với database
 databaseService.connect()
 
+// Use Helmet!
+app.use(helmet())
+
 // Quy định CORS
+// app.use(cors({ origin: isProduction ? envConfig.CLIENT_URL : '*' }))
 app.use(cors({ origin: '*' }))
 
 // parse json của client gởi lên, chuyển thành dạnh object để xử lý
