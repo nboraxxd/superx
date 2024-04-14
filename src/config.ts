@@ -1,21 +1,33 @@
 import fs from 'fs'
 import path from 'path'
 import z from 'zod'
-import argv from 'minimist'
 import { config } from 'dotenv'
 
-const options = argv(process.argv.slice(2))
+const env = process.env.NODE_ENV
 
-export const isProduction = options.env === 'production'
+if (!env) {
+  console.log('🚧 Không tìm thấy biến môi trường NODE_ENV')
+  process.exit(1)
+}
+
+export const isProduction = env === 'production'
+
+const envFileName = `.env.${env}`
+console.log(`🛵 NODE_ENV = ${env}, app sẽ dùng file môi trường là ${envFileName}`)
+
+if (!fs.existsSync(path.resolve(envFileName))) {
+  console.log('🚧 Không tìm thấy file môi trường .env')
+  process.exit(1)
+}
 
 config({
-  path: options.env ? `.env.${options.env}` : '.env.development',
+  path: envFileName,
 })
 
 const checkEnv = async () => {
   const chalk = (await import('chalk')).default
 
-  if (!fs.existsSync(path.resolve(options.env ? `.env.${options.env}` : '.env.development'))) {
+  if (!fs.existsSync(path.resolve(envFileName))) {
     console.log(chalk.red('Không tìm thấy file môi trường .env'))
     process.exit(1)
   }
