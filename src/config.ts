@@ -1,16 +1,20 @@
 import fs from 'fs'
 import path from 'path'
 import z from 'zod'
+import argv from 'minimist'
 import { config } from 'dotenv'
 
+const options = argv(process.argv.slice(2))
+console.log('🔥 ~ options:', options)
+
 config({
-  path: '.env.development',
+  path: options.env ? `.env.${options.env}` : '.env.development',
 })
 
 const checkEnv = async () => {
   const chalk = (await import('chalk')).default
 
-  if (!fs.existsSync(path.resolve('.env.development'))) {
+  if (!fs.existsSync(path.resolve(options.env ? `.env.${options.env}` : '.env.development'))) {
     console.log(chalk.red('Không tìm thấy file môi trường .env'))
     process.exit(1)
   }
