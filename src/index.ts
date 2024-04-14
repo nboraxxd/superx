@@ -3,11 +3,13 @@ import cors from 'cors'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
+import { rateLimit } from 'express-rate-limit'
 
 import envConfig, { API_URL } from '@/config'
 import usersRouter from '@/routes/users.routes'
 import databaseService from '@/services/database.services'
 import { defaultErrorHandler } from '@/middlewares/error.middlewares'
+import ms from 'ms'
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -46,6 +48,15 @@ const openapiSpecification = swaggerJsdoc(options)
 
 const port = envConfig.PORT
 const app = express()
+
+const limiter = rateLimit({
+  windowMs: ms('15m'), // 15 minutes
+  limit: 500, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  // store: ... , // Use an external store for consistency across multiple server instances.
+})
+app.use(limiter)
 
 // kết nối với database
 databaseService.connect()
