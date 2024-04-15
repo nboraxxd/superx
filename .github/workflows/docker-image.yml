@@ -1,0 +1,26 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create environment file
+        run: echo "${{ secrets.SUPERX_ENV_PRODUCTION }}" > .env.production
+      - name: Build the Docker image
+        run: |
+          IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/superx:$(date +%s)
+          docker build --progress=plain -t $IMAGE_TAG .
+          echo "::set-output name=image_tag::$IMAGE_TAG"
+        id: build
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Push the Docker image
+        run: docker push ${{ steps.build.outputs.image_tag }}
