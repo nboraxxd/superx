@@ -1,0 +1,6 @@
+version: '3'
+services:
+  superx:
+    image: dev/superx:v2
+    ports:
+      - '4000:4000'
