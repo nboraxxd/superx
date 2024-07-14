@@ -5,11 +5,11 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 import { rateLimit } from 'express-rate-limit'
 
-import envConfig, { API_URL } from '@/config'
 import usersRouter from '@/routes/users.routes'
 import databaseService from '@/services/database.services'
 import { defaultErrorHandler } from '@/middlewares/error.middlewares'
 import ms from 'ms'
+import { envVariables } from '@/env-variables'
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -22,7 +22,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:4000',
+        url: envVariables.SERVER_URL,
       },
     ],
     tags: [
@@ -46,7 +46,7 @@ const options: swaggerJsdoc.Options = {
 
 const openapiSpecification = swaggerJsdoc(options)
 
-const port = envConfig.PORT
+const port = envVariables.PORT
 const app = express()
 
 const limiter = rateLimit({
@@ -78,5 +78,5 @@ app.use('/users', usersRouter)
 app.use(defaultErrorHandler)
 
 app.listen(port, () => {
-  console.log(`App listening at ${API_URL}`)
+  console.log(`App listening at ${envVariables.PORT}`)
 })

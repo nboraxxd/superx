@@ -4,7 +4,6 @@ import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { JsonWebTokenError } from 'jsonwebtoken'
 
-import envConfig from '@/config'
 import User from '@/models/schemas/User.schema'
 import usersService from '@/services/users.services'
 import databaseService from '@/services/database.services'
@@ -25,6 +24,7 @@ import {
   VerifyEmailReqBody,
   VerifyForgotPasswordReqBody,
 } from '@/models/requests/User.requests'
+import { envVariables } from '@/env-variables'
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   const { name, email, date_of_birth, password } = req.body
@@ -77,12 +77,12 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   try {
     const { iat: emailVerifyTokenIat } = await verifyToken({
       token: user.email_verify_token,
-      secretOrPublicKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
+      secretOrPublicKey: envVariables.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
     })
 
     const emailResendDelaySeconds = calculateSecondsDifference(
       emailVerifyTokenIat,
-      envConfig.RESEND_EMAIL_DEBOUNCE_TIME
+      +(envVariables.RESEND_EMAIL_DEBOUNCE_TIME as string)
     )
 
     // Nếu khoảng cách giữa thời gian iat + 60s và thời gian hiện tại lớn hơn 0 thì trả về thông báo
@@ -140,12 +140,12 @@ export const forgotPasswordController = async (
     try {
       const { iat: forgotPasswordTokenIat } = await verifyToken({
         token: forgot_password_token,
-        secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+        secretOrPublicKey: envVariables.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
       })
 
       const emailResendDelaySeconds = calculateSecondsDifference(
         forgotPasswordTokenIat,
-        envConfig.RESEND_EMAIL_DEBOUNCE_TIME
+        +(envVariables.RESEND_EMAIL_DEBOUNCE_TIME as string)
       )
 
       // Nếu khoảng cách giữa thời gian iat + 60s và thời gian hiện tại lớn hơn 0 thì trả về thông báo

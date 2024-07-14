@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { HttpStatusCode } from 'axios'
 
-import envConfig from '@/config'
 import databaseService from '@/services/database.services'
 import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
@@ -11,14 +10,15 @@ import { TokenType, UserVerifyStatus } from '@/constants/enums'
 import { AUTHENTICATION_MESSAGES, EMAIL_MESSAGES, USER_MESSAGES } from '@/constants/message'
 import { signToken } from '@/utils/jwt'
 import { hashPassword } from '@/utils/crypto'
+import { envVariables } from '@/env-variables'
 
 class UsersService {
   private async signAccessToken(user_id: string, verify: UserVerifyStatus) {
     return signToken({
       payload: { user_id, token_type: TokenType.AccessToken, verify },
-      privateKey: envConfig.JWT_SECRET_ACCESS_TOKEN,
+      privateKey: envVariables.JWT_SECRET_ACCESS_TOKEN as string,
       options: {
-        expiresIn: envConfig.JWT_ACCESS_TOKEN_EXPIRES_IN,
+        expiresIn: envVariables.JWT_ACCESS_TOKEN_EXPIRES_IN as string,
       },
     })
   }
@@ -26,9 +26,9 @@ class UsersService {
   private async signRefreshToken(user_id: string, verify: UserVerifyStatus) {
     return signToken({
       payload: { user_id, token_type: TokenType.RefreshToken, verify },
-      privateKey: envConfig.JWT_SECRET_REFRESH_TOKEN,
+      privateKey: envVariables.JWT_SECRET_REFRESH_TOKEN as string,
       options: {
-        expiresIn: envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN,
+        expiresIn: envVariables.JWT_REFRESH_TOKEN_EXPIRES_IN as string,
       },
     })
   }
@@ -40,9 +40,9 @@ class UsersService {
   private async signEmailVerifyToken(user_id: string, verify: UserVerifyStatus) {
     return signToken({
       payload: { user_id, token_type: TokenType.EmailVerifyToken, verify },
-      privateKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
+      privateKey: envVariables.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
       options: {
-        expiresIn: envConfig.JWT_EMAIL_VERIFY_TOKEN_EXPIRES_IN,
+        expiresIn: envVariables.JWT_EMAIL_VERIFY_TOKEN_EXPIRES_IN as string,
       },
     })
   }
@@ -50,9 +50,9 @@ class UsersService {
   private async signForgotPasswordToken(user_id: string, verify: UserVerifyStatus) {
     return signToken({
       payload: { user_id, token_type: TokenType.ForgotPasswordToken, verify },
-      privateKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+      privateKey: envVariables.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
       options: {
-        expiresIn: envConfig.JWT_FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
+        expiresIn: envVariables.JWT_FORGOT_PASSWORD_TOKEN_EXPIRES_IN as string,
       },
     })
   }

@@ -1,10 +1,11 @@
 import { Collection, Db, MongoClient } from 'mongodb'
 
-import envConfig from '@/config'
 import User from '@/models/schemas/User.schema'
 import RefreshToken from '@/models/schemas/RefreshToken.schema'
+import { envVariables } from '@/env-variables'
+console.log('🔥 ~ envVariables:', envVariables.DB_USERNAME)
 
-const uri = `mongodb+srv://${envConfig.DB_USERNAME}:${envConfig.DB_PASSWORD}@ap-southeast-1.5mtehqr.mongodb.net/?retryWrites=true&w=majority&appName=${envConfig.DB_CLUSTER}`
+const uri = `mongodb+srv://${envVariables.DB_USERNAME}:${envVariables.DB_PASSWORD}@ap-southeast-1.5mtehqr.mongodb.net/?retryWrites=true&w=majority&appName=${envVariables.DB_CLUSTER}`
 
 class DatabaseService {
   private client: MongoClient
@@ -12,7 +13,7 @@ class DatabaseService {
 
   constructor() {
     this.client = new MongoClient(uri)
-    this.db = this.client.db(envConfig.DB_NAME)
+    this.db = this.client.db(envVariables.DB_NAME)
   }
 
   async connect() {
@@ -27,11 +28,11 @@ class DatabaseService {
   }
 
   get users(): Collection<User> {
-    return this.db.collection(envConfig.DB_USERS_COLLECTION)
+    return this.db.collection(envVariables.DB_USERS_COLLECTION as string)
   }
 
   get refreshTokens(): Collection<RefreshToken> {
-    return this.db.collection(envConfig.DB_REFRESH_TOKENS_COLLECTION)
+    return this.db.collection(envVariables.DB_REFRESH_TOKENS_COLLECTION as string)
   }
 }
 

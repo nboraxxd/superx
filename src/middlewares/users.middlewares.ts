@@ -3,7 +3,6 @@ import { HttpStatusCode } from 'axios'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ParamSchema, checkSchema } from 'express-validator'
 
-import envConfig from '@/config'
 import databaseService from '@/services/database.services'
 import { validate } from '@/utils/validation'
 import { hashPassword } from '@/utils/crypto'
@@ -25,6 +24,7 @@ import {
   USER_MESSAGES,
   WEBSITE_MESSAGES,
 } from '@/constants/message'
+import { envVariables } from '@/env-variables'
 
 // do trim sẽ chuyển giá trị về string type, nên phải check isString trước trim
 const nameSchema: ParamSchema = {
@@ -109,7 +109,7 @@ const forgotPasswordTokenSchema: ParamSchema = {
       try {
         const decoded_forgot_password_token = await verifyToken({
           token: value,
-          secretOrPublicKey: envConfig.JWT_SECRET_FORGOT_PASSWORD_TOKEN,
+          secretOrPublicKey: envVariables.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
         })
 
         ;(req as Request).decoded_forgot_password_token = decoded_forgot_password_token
@@ -159,7 +159,7 @@ export const accessTokenValidator = validate(
             try {
               const decoded_authorization = await verifyToken({
                 token: access_token,
-                secretOrPublicKey: envConfig.JWT_SECRET_ACCESS_TOKEN,
+                secretOrPublicKey: envVariables.JWT_SECRET_ACCESS_TOKEN as string,
               })
 
               ;(req as Request).decoded_authorization = decoded_authorization
@@ -200,7 +200,7 @@ export const refreshTokenValidator = validate(
               const [decoded_refresh_token, refresh_token] = await Promise.all([
                 verifyToken({
                   token: value,
-                  secretOrPublicKey: envConfig.JWT_SECRET_REFRESH_TOKEN,
+                  secretOrPublicKey: envVariables.JWT_SECRET_REFRESH_TOKEN as string,
                 }),
                 databaseService.refreshTokens.findOne({ token: value }),
               ])
@@ -294,7 +294,7 @@ export const verifyEmailValidator = validate(
             try {
               const decoded_email_verify_token = await verifyToken({
                 token: value,
-                secretOrPublicKey: envConfig.JWT_SECRET_EMAIL_VERIFY_TOKEN,
+                secretOrPublicKey: envVariables.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
               })
 
               ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
